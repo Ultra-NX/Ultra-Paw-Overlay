@@ -806,14 +806,14 @@ namespace tsl {
         constexpr u8  ListItemHighlightLength       = 22;       ///< Maximum length of Listitem highlights
 
         namespace color {
-            constexpr Color ColorFrameBackground  = { 0x0, 0x0, 0x0, 0xD };   ///< Overlay frame background color
+            constexpr Color ColorFrameBackground  = { 0x0, 0x0, 0x0, 0xA };   ///< Overlay frame background color
             constexpr Color ColorTransparent      = { 0x0, 0x0, 0x0, 0x0 };   ///< Transparent color
-            constexpr Color ColorHighlight        = { 0x0, 0xF, 0xD, 0xF };   ///< Greenish highlight color
-            constexpr Color ColorFrame            = { 0x7, 0x7, 0x7, 0x7 };   ///< Outer boarder color // CUSTOM MODIFICATION
-            constexpr Color ColorHandle           = { 0x5, 0x5, 0x5, 0xF };   ///< Track bar handle color
-            constexpr Color ColorText             = { 0xF, 0xF, 0xF, 0xF };   ///< Standard text color
-            constexpr Color ColorDescription      = { 0xA, 0xA, 0xA, 0xF };   ///< Description text color
-            constexpr Color ColorHeaderBar        = { 0xC, 0xC, 0xC, 0xF };   ///< Category header rectangle color
+            constexpr Color ColorHighlight        = { 0x0, 0xE, 0x0, 0xF };   ///< Greenish highlight color
+            constexpr Color ColorFrame            = { 0x0, 0x0, 0x0, 0x0 };   ///< Outer boarder color // CUSTOM MODIFICATION
+            constexpr Color ColorHandle           = { 0x0, 0x0, 0x0, 0x0 };   ///< Track bar handle color
+            constexpr Color ColorText             = { 0xC, 0xC, 0xC, 0xF };   ///< Standard text color
+            constexpr Color ColorDescription      = { 0xC, 0xC, 0xC, 0xF };   ///< Description text color
+            constexpr Color ColorHeaderBar        = { 0x0, 0x2, 0x2, 0xF };   ///< Category header rectangle color
             constexpr Color ColorClickAnimation   = { 0x0, 0x2, 0x2, 0xF };   ///< Element click animation color
         }
     }
@@ -1017,7 +1017,7 @@ namespace tsl {
             /**
              * @brief Tesla config file
              */
-            static const char* CONFIG_FILE = "/config/ultrahand/config.ini"; // CUSTOM MODIFICATION
+            static const char* CONFIG_FILE = "/config/ultrapaw/config.ini"; // CUSTOM MODIFICATION
 
             /**
              * @brief Parses a ini string
@@ -2339,11 +2339,11 @@ namespace tsl {
             std::string m_pageLeftName; // CUSTOM MODIFICATION
             std::string m_pageRightName; // CUSTOM MODIFICATION
             
-            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "text_color");
+            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
-            std::string clockColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "clock_color");
+            std::string clockColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "clock_color");
             tsl::Color clockColor = RGB888(clockColorStr);
-            std::string batteryColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "battery_color");
+            std::string batteryColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "battery_color");
             tsl::Color batteryColor = RGB888(batteryColorStr);
             
             
@@ -2362,11 +2362,11 @@ namespace tsl {
                 
                 int y = 50;
                 int offset = 0;
-                // Check if m_title is "Ultrahand"
-                if (this->m_title == "Ultrahand" && this->m_subtitle != "Ultrahand Package" && this->m_subtitle != "Ultrahand Script") {
+                // Check if m_title is "Ultra Paw"
+                if (this->m_title == "Ultra Paw" && this->m_subtitle != "Ultra Paw Package" && this->m_subtitle != "Ultra Paw Script") {
                     static float counter = 0;
                     std::string firstHalf = "Ultra";
-                    std::string secondHalf = "hand";
+                    std::string secondHalf = "Paw";
                     
                     float x = 20;
                     //int y = 50;
@@ -2379,7 +2379,9 @@ namespace tsl {
                     Color highlightColor = {0xF, 0xF, 0xF, 0xF};
                     float progress;
                     float letterWidth;
-                    for (char letter : firstHalf) {
+                    // Draw the second half of the string in red color
+                    renderer->drawString(firstHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0xF, 0xF, 0xF));
+                    for (char letter : secondHalf) {
                         // Calculate the progress for each letter based on the counter
                         progress = calculateAmplitude(counter - x * 0.001F);
                         
@@ -2392,7 +2394,7 @@ namespace tsl {
                         };
                         
                         // Draw each character with its corresponding highlight color
-                        renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, a(highlightColor));
+                        renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, a(highlightColor));
                         
                         // Manually calculate the width of the current letter
                         letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
@@ -2401,15 +2403,9 @@ namespace tsl {
                         x += letterWidth;
                         
                         // Update the counter for the next character
-                        counter += 0.0002F;
+                        counter += 0.0003F;
                     }
                     
-                    
-                    // Calculate the position for the second half based on the width of the first half
-                    //int x2 = x1 + (firstHalf.length() * fontSize)/2 -2;
-                    
-                    // Draw the second half of the string in red color
-                    renderer->drawString(secondHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0x0, 0x0, 0xF));
                     
                     
                     // Time drawing implementation
@@ -2478,7 +2474,7 @@ namespace tsl {
                     float x = 20;
                     int y = 50;
                     int fontSize = 32;
-                    if (this->m_subtitle == "Ultrahand Package") {
+                    if (this->m_subtitle == "Ultra Paw Package") {
                         std::string title = std::string(this->m_title);
                         auto titleColor = a(Color(0x0, 0xF, 0x0, 0xF));
                         if (this->m_colorSelection == "" || this->m_colorSelection == "green") {
@@ -2544,7 +2540,7 @@ namespace tsl {
                         } else { // for unknown colors
                             renderer->drawString(title.c_str(), false, x, y, fontSize, titleColor);
                         }
-                    } else if (this->m_subtitle == "Ultrahand Script") {
+                    } else if (this->m_subtitle == "Ultra Paw Script") {
                         renderer->drawString(this->m_title.c_str(), false, 20, 50, 32, a(Color(0xFF, 0x33, 0x3F, 0xFF)));
                     } else {
                         renderer->drawString(this->m_title.c_str(), false, 20, 50, 30, a(defaultTextColor));
@@ -2649,7 +2645,7 @@ namespace tsl {
          */
         class HeaderOverlayFrame : public Element {
         public:
-            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "text_color");
+            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             
             HeaderOverlayFrame(u16 headerHeight = 175) : Element(), m_headerHeight(headerHeight) {}
@@ -3100,7 +3096,7 @@ namespace tsl {
          */
         class ListItem : public Element {
         public:
-            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "text_color");
+            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             /**
              * @brief Constructor
@@ -3355,7 +3351,7 @@ namespace tsl {
 
         class CategoryHeader : public Element {
         public:
-            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "text_color");
+            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             CategoryHeader(const std::string &title, bool hasSeparator = false) : m_text(title), m_hasSeparator(hasSeparator) {}
             virtual ~CategoryHeader() {}
@@ -3410,7 +3406,7 @@ namespace tsl {
          */
         class TrackBar : public Element {
         public:
-            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "text_color");
+            std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             /**
              * @brief Constructor
@@ -4353,19 +4349,19 @@ namespace tsl {
         static void parseOverlaySettings() {
             hlp::ini::IniData parsedConfig = hlp::ini::readOverlaySettings();
 
-            u64 decodedKeys = hlp::comboStringToKeys(parsedConfig["ultrahand"]["key_combo"]); // CUSTOM MODIFICATION
+            u64 decodedKeys = hlp::comboStringToKeys(parsedConfig["ultrapaw"]["key_combo"]); // CUSTOM MODIFICATION
             if (decodedKeys)
                 tsl::cfg::launchCombo = decodedKeys;
             
             
             // read datetime_format
-            datetimeFormat = removeQuotes(parsedConfig["ultrahand"]["datetime_format"]);
+            datetimeFormat = removeQuotes(parsedConfig["ultrapaw"]["datetime_format"]);
             
             if (datetimeFormat.empty()) {
                 datetimeFormat = removeQuotes(DEFAULT_DT_FORMAT);
             }
             
-            //defaultTextColorStr = removeQuotes(parsedConfig["ultrahand"]["text_color"]);
+            //defaultTextColorStr = removeQuotes(parsedConfig["ultrapaw"]["text_color"]);
             //if (defaultTextColorStr.empty()) {
             //    defaultTextColorStr =  "#FFFFFF";
             //}
@@ -4379,7 +4375,7 @@ namespace tsl {
         [[maybe_unused]] static void updateCombo(u64 keys) {
             tsl::cfg::launchCombo = keys;
             hlp::ini::updateOverlaySettings({
-                { "ultrahand", { // CUSTOM MODIFICATION
+                { "ultrapaw", { // CUSTOM MODIFICATION
                     { "key_combo", tsl::hlp::keysToComboString(keys) }
                 }}
             });
@@ -4564,12 +4560,12 @@ namespace tsl {
             }
         }
         
-        std::string settingsConfigPath = "sdmc:/config/ultrahand/config.ini";
+        std::string settingsConfigPath = "sdmc:/config/ultrapaw/config.ini";
         std::map<std::string, std::map<std::string, std::string>> settingsData = getParsedDataFromIniFile(settingsConfigPath);
         std::string inOverlayString;
 
-        if (settingsData.count("ultrahand") > 0 && settingsData["ultrahand"].count("in_overlay") > 0) {
-            inOverlayString = settingsData["ultrahand"]["in_overlay"];
+        if (settingsData.count("ultrapaw") > 0 && settingsData["ultrapaw"].count("in_overlay") > 0) {
+            inOverlayString = settingsData["ultrapaw"]["in_overlay"];
         } else {
             inOverlayString = "false"; // Assign default value if the keys are not present
         }
@@ -4577,7 +4573,7 @@ namespace tsl {
         bool inOverlay = false;
         if (inOverlayString == "true") {
             inOverlay = true;
-            setIniFileValue(settingsConfigPath, "ultrahand", "in_overlay", "false");
+            setIniFileValue(settingsConfigPath, "ultrapaw", "in_overlay", "false");
         }
         
         

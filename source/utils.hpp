@@ -96,7 +96,7 @@
  *
  * - `packageFileName`: The name of the package file ("package.ini").
  * - `configFileName`: The name of the configuration file ("config.ini").
- * - `settingsPath`: The base path for Ultrahand settings ("sdmc:/config/ultrahand/").
+ * - `settingsPath`: The base path for Ultrahand settings ("sdmc:/config/ultrapaw/").
  * - `settingsConfigIniPath`: The full path to the Ultrahand settings configuration file.
  * - `packageDirectory`: The base directory for packages ("sdmc:/switch/.packages/").
  * - `overlayDirectory`: The base directory for overlays ("sdmc:/switch/.overlays/").
@@ -108,7 +108,7 @@
 const std::string bootPackageFileName = "boot_package.ini";
 const std::string packageFileName = "package.ini";
 const std::string configFileName = "config.ini";
-const std::string settingsPath = "sdmc:/config/ultrahand/";
+const std::string settingsPath = "sdmc:/config/ultrapaw/";
 const std::string settingsConfigIniPath = settingsPath + configFileName;
 const std::string themeConfigIniPath = settingsPath + "theme.ini";
 const std::string packageDirectory = "sdmc:/switch/.packages/";
@@ -143,11 +143,11 @@ void copyTeslaKeyComboToUltrahand() {
     if (!keyCombo.empty()){
         if (isFileOrDirectory(settingsConfigIniPath)) {
             parsedData = getParsedDataFromIniFile(settingsConfigIniPath);
-            if (parsedData.count("ultrahand") > 0) {
-                auto& ultrahandSection = parsedData["ultrahand"];
+            if (parsedData.count("ultrapaw") > 0) {
+                auto& ultrahandSection = parsedData["ultrapaw"];
                 if (ultrahandSection.count("key_combo") == 0) {
                     // Write the key combo to the destination file
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "key_combo", keyCombo);
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", keyCombo);
                 }
             }
         }
@@ -315,6 +315,35 @@ bool isDangerousCombination(const std::string& patternPath) {
 
 
 
+bool isMarikoHWType()
+{
+    u64 hardware_type = -1;
+    auto rc = splGetConfig(SplConfigItem_HardwareType, &hardware_type);
+    if (R_FAILED(rc)) {
+        logMessage("ERROR: splGetConfig failed to fetch HardwareType");
+        return false;
+    }
+
+    logMessage("INFO: HardwareType: " + std::to_string(hardware_type));
+
+    switch (hardware_type) {
+    case 0: // Icosa
+    case 1: // Copper
+        return false; // Erista
+    case 2: // Hoag
+    case 3: // Iowa
+    case 4: // Calcio
+    case 5: // Aula
+        return true; // Mariko
+    default:
+        logMessage("ERROR: unknown HardwareType: " + std::to_string(hardware_type));
+        throw std::runtime_error("ERROR: unknown HardwareType: " + std::to_string(hardware_type));
+        return false;
+    }
+}
+
+
+
 /**
  * @brief Loads and parses options from an INI file.
  *
@@ -351,6 +380,8 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
     char line[BufferSize];
     std::string currentOption;
     std::vector<std::vector<std::string>> commands;
+    static bool isMariko = isMarikoHWType();
+    bool skipCommand = false;
     
     bool isFirstEntry = true;
     while (fgets(line, sizeof(line), configFile)) {
@@ -360,6 +391,12 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
         if (trimmedLine.empty() || trimmedLine[0] == '#') {
             // Skip empty lines and comment lines
             continue;
+        } else if (trimmedLine == ";Mariko") {
+            skipCommand = (!isMariko);
+            continue;
+        } else if (trimmedLine == ";Erista") {
+            skipCommand = (isMariko);
+            continue;
         } else if (trimmedLine[0] == '[' && trimmedLine.back() == ']') {
             if (isFirstEntry) { // for preventing header comments from being loaded within the first command section
                 commands.clear();
@@ -368,12 +405,15 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
             
             // New option section
             if (!currentOption.empty()) {
+                if(!skipCommand){
                 // Store previous option and its commands
                 options.emplace_back(std::move(currentOption), std::move(commands));
+                }
                 commands.clear();
+                skipCommand = false;
             }
             currentOption = trimmedLine.substr(1, trimmedLine.size() - 2);  // Extract option name
-        } else {
+        } else if (!currentOption.empty()) {
             // Command line
             std::istringstream iss(trimmedLine);
             std::vector<std::string> commandParts;
@@ -401,7 +441,9 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
     
     // Store the last option and its commands
     if (!currentOption.empty()) {
-        options.emplace_back(std::move(currentOption), std::move(commands));
+            if(!skipCommand){
+                options.emplace_back(std::move(currentOption), std::move(commands));
+        }
     }
     
     fclose(configFile);
@@ -853,6 +895,24 @@ bool interpretAndExecuteCommand(const std::vector<std::vector<std::string>> comm
                 customPattern = removeQuotes(command[2]);
                 offset = removeQuotes(command[3]);
                 hexDataReplacement = removeQuotes(command[4]);
+                hexEditByCustomOffset(sourcePath.c_str(), customPattern.c_str(), offset.c_str(), hexDataReplacement.c_str());
+            }
+        } else if (commandName == "hex-by-decimal-custom-offset") {
+            // Edit command - Hex data replacement with offset (decimal)
+            if (command.size() >= 5) {
+                sourcePath = preprocessPath(command[1]);
+                customPattern = removeQuotes(command[2]);
+                offset = removeQuotes(command[3]);
+                hexDataReplacement = decimalToHex(removeQuotes(command[4]));
+                hexEditByCustomOffset(sourcePath.c_str(), customPattern.c_str(), offset.c_str(), hexDataReplacement.c_str());
+            }
+        } else if (commandName == "hex-by-rdecimal-custom-offset") {
+            // Edit command - Hex data replacement with offset (rdecimal)
+            if (command.size() >= 5) {
+                sourcePath = preprocessPath(command[1]);
+                customPattern = removeQuotes(command[2]);
+                offset = removeQuotes(command[3]);
+                hexDataReplacement = decimalToReversedHex(removeQuotes(command[4]));
                 hexEditByCustomOffset(sourcePath.c_str(), customPattern.c_str(), offset.c_str(), hexDataReplacement.c_str());
             }
         } else if (commandName == "hex-by-swap") {
