@@ -10,6 +10,9 @@
  *   For the latest updates and contributions, visit the project's GitHub repository.
  *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
  *
+ *   Note: Please be aware that this notice cannot be altered or removed. It is a part
+ *   of the project's documentation and must remain intact.
+ * 
  *  Copyright (c) 2023 ppkantorski
  *  All rights reserved.
  ********************************************************************************/
@@ -38,6 +41,28 @@ std::string trim(const std::string& str) {
         return "";
     return str.substr(first, last - first + 1);
 }
+
+
+/**
+ * @brief Removes all white spaces from a string.
+ *
+ * This function removes all white spaces, including spaces, tabs, newlines, carriage returns, form feeds,
+ * and vertical tabs from the input string.
+ *
+ * @param str The input string to remove white spaces from.
+ * @return The string with white spaces removed.
+ */
+std::string removeWhiteSpaces(const std::string& str) {
+    std::string result;
+    for (char c : str) {
+        if (!std::isspace(static_cast<unsigned char>(c))) {
+            result.push_back(c);
+        }
+    }
+    return result;
+}
+
+
 
 /**
  * @brief Removes quotes from a string.
