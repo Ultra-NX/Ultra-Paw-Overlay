@@ -287,10 +287,10 @@ public:
             
             listItem->setClickListener([this, listItem](uint64_t keys) { // Add 'command' to the capture list
                 if (keys & KEY_A) {
-                    deleteFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl");
-                    isDownloaded = downloadFile("https://github.com/ppkantorski/Ultrahand-Overlay/releases/latest/download/ovlmenu.ovl", "/config/ultrahand/downloads/");
+                    deleteFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl");
+                    isDownloaded = downloadFile("https://github.com/Ultra-NX/Ultra-Paw-Overlay/releases/latest/download/ovlmenu.ovl", "/config/ultrapaw/downloads/");
                     if (isDownloaded) {
-                        moveFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
+                        moveFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
                         listItem->setValue(CHECKMARK_SYMBOL);
                     } else
                         listItem->setValue(CROSSMARK_SYMBOL, false);
