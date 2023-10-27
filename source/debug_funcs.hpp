@@ -79,18 +79,18 @@ void trimLog(FILE* file) {
 void logMessage(const std::string& message) {
     std::time_t currentTime = std::time(nullptr);
     std::string logEntry = std::asctime(std::localtime(&currentTime));
-    std::size_t lastNonNewline = logEntry.find_last_not_of("\r\n");
+    /*std::size_t lastNonNewline = logEntry.find_last_not_of("\r\n");
     if (lastNonNewline != std::string::npos) {
         logEntry.erase(lastNonNewline + 1);
-    }
+    }*/
     logEntry = "[" + logEntry + "] " + message + "\n";
 
-    FILE* file = fopen(logFilePath.c_str(), "a");
+    /*FILE* file = fopen(logFilePath.c_str(), "a");
     if (file != nullptr) {
         fputs(logEntry.c_str(), file);
         trimLog(file);
         fclose(file);
-    }
+    }*/
 }
 
 
