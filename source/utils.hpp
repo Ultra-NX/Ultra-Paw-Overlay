@@ -103,7 +103,7 @@ void copyTeslaKeyComboToUltrahand() {
         }
     } else {
         // Write the key combo to the destination file
-        setIniFileValue(settingsConfigIniPath, "ultrahand", "key_combo", keyCombo);
+        setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", keyCombo);
     }
     tsl::impl::parseOverlaySettings();
 }

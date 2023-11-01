@@ -878,10 +878,10 @@ static std::string datetimeFormat = removeQuotes(DEFAULT_DT_FORMAT);
 static std::string hideClock, hideBattery, hidePCBTemp, hideSOCTemp;
 
 void reinitializeWidgetVars() {
-    hideClock = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_clock");
-    hideBattery = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_battery");
-    hideSOCTemp = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_soc_temp");
-    hidePCBTemp = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_pcb_temp");
+    hideClock = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_clock");
+    hideBattery = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_battery");
+    hideSOCTemp = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_soc_temp");
+    hidePCBTemp = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_pcb_temp");
 }
 
 static std::string cleanVersionLabels, hideOverlayVersions, hidePackageVersions;
@@ -890,9 +890,9 @@ static std::string loaderInfo = envGetLoaderInfo();
 static std::string versionLabel;
 
 void reinitializeVersionLabels() {
-    cleanVersionLabels = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "clean_version_labels");
-    hideOverlayVersions = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_overlay_versions");
-    hidePackageVersions = parseValueFromIniSection("/config/ultrahand/config.ini", "ultrahand", "hide_package_versions");
+    cleanVersionLabels = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "clean_version_labels");
+    hideOverlayVersions = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_overlay_versions");
+    hidePackageVersions = parseValueFromIniSection("/config/ultrapaw/config.ini", "ultrapaw", "hide_package_versions");
     if (cleanVersionLabels == "true")
         versionLabel = APP_VERSION+std::string("   (")+ extractTitle(loaderInfo)+" "+cleanVersionLabel(loaderInfo)+std::string(")"); // Still needs to parse nx-ovlloader instead of hard coding it
     else
@@ -2136,8 +2136,8 @@ namespace tsl {
             Element() {}
             virtual ~Element() { }
             
-            std::string highlightColor1Str = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "highlight_color_1");
-            std::string highlightColor2Str = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "highlight_color_2");
+            std::string highlightColor1Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_1");
+            std::string highlightColor2Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_2");
             
             Color highlightColor1 = RGB888(highlightColor1Str, "#2288CC");
             Color highlightColor2 = RGB888(highlightColor2Str, "#88FFFF");
@@ -3089,7 +3089,7 @@ namespace tsl {
                     delete item;
             }
             
-            std::string trackBarColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "trackbar_color");
+            std::string trackBarColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "trackbar_color");
             Color trackBarColor = RGB888(trackBarColorStr, "#555555");
 
             virtual void draw(gfx::Renderer *renderer) override {
@@ -3730,7 +3730,7 @@ namespace tsl {
         public:
             std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
-            std::string trackBarColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "trackbar_color");
+            std::string trackBarColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "trackbar_color");
             Color trackBarColor = RGB888(trackBarColorStr, "#555555");
             
             /**
@@ -4688,7 +4688,7 @@ namespace tsl {
             }
             
             try {
-                hideClock = removeQuotes(parsedConfig["ultrahand"]["hide_clock"]);
+                hideClock = removeQuotes(parsedConfig["ultrapaw"]["hide_clock"]);
             } catch (const std::exception& e) {}
             if (hideClock.empty())
                 hideClock = "false";
@@ -4700,13 +4700,13 @@ namespace tsl {
                 hideBattery = "false";
             
             try {
-                hidePCBTemp = removeQuotes(parsedConfig["ultrahand"]["hide_pcb_temp"]);
+                hidePCBTemp = removeQuotes(parsedConfig["ultrapaw"]["hide_pcb_temp"]);
             } catch (const std::exception& e) {}
             if (hidePCBTemp.empty())
                 hidePCBTemp = "false";
             
             try {
-                hideSOCTemp = removeQuotes(parsedConfig["ultrahand"]["hide_soc_temp"]);
+                hideSOCTemp = removeQuotes(parsedConfig["ultrapaw"]["hide_soc_temp"]);
             } catch (const std::exception& e) {}
             if (hideSOCTemp.empty())
                 hideSOCTemp = "false";

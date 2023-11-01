@@ -419,10 +419,10 @@ public:
             
             listItem->setClickListener([this, listItem](uint64_t keys) { // Add 'command' to the capture list
                 if (keys & KEY_A) {
-                    deleteFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl");
-                    isDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/ovlmenu.ovl", "/config/ultrahand/downloads/");
+                    deleteFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl");
+                    isDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/ovlmenu.ovl", "/config/ultrapaw/downloads/");
                     if (isDownloaded) {
-                        moveFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
+                        moveFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
                         listItem->setValue(CHECKMARK_SYMBOL);
                         languagesVersion = "latest";
                     } else
@@ -440,17 +440,17 @@ public:
             
             listItem->setClickListener([this, listItem](uint64_t keys) { // Add 'command' to the capture list
                 if (keys & KEY_A) {
-                    deleteFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl");
+                    deleteFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl");
                     bool languageDownloaded = false;
                     if (languagesVersion == "latest")
-                        languageDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/lang.zip", "/config/ultrahand/downloads/");
+                        languageDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/lang.zip", "/config/ultrapaw/downloads/");
                     else
                         languageDownloaded = downloadFile(ultrahandRepo+"releases/download/v"+languagesVersion+"/lang.zip", "/config/ultrahand/downloads/");
                     if (languageDownloaded) {
-                        unzipFile("/config/ultrahand/downloads/lang.zip", "/config/ultrahand/downloads/lang/");
-                        deleteFileOrDirectory("/config/ultrahand/downloads/lang.zip");
-                        deleteFileOrDirectory("/config/ultrahand/lang/");
-                        moveFileOrDirectory("/config/ultrahand/downloads/lang/", "/config/ultrahand/lang/");
+                        unzipFile("/config/ultrapaw/downloads/lang.zip", "/config/ultrapaw/downloads/lang/");
+                        deleteFileOrDirectory("/config/ultrapaw/downloads/lang.zip");
+                        deleteFileOrDirectory("/config/ultrapaw/lang/");
+                        moveFileOrDirectory("/config/ultrapaw/downloads/lang/", "/config/ultrapaw/lang/");
                         listItem->setValue(CHECKMARK_SYMBOL);
                     } else
                         listItem->setValue(CROSSMARK_SYMBOL, false);
@@ -584,7 +584,7 @@ public:
             auto toggleListItem = new tsl::elm::ToggleListItem(CLOCK, false, ON, OFF);
             toggleListItem->setState((hideClock == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_clock", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_clock", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -594,7 +594,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(BATTERY, false, ON, OFF);
             toggleListItem->setState((hideBattery == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_battery", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_battery", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -603,7 +603,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(SOC_TEMPERATURE, false, ON, OFF);
             toggleListItem->setState((hideSOCTemp == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_soc_temp", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_soc_temp", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -612,16 +612,16 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(PCB_TEMPERATURE, false, ON, OFF);
             toggleListItem->setState((hidePCBTemp == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_pcb_temp", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_pcb_temp", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
             list->addItem(toggleListItem);
             
         } else if (dropdownSelection == "versionLabelMenu") {
-            cleanVersionLabels = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "clean_version_labels");
-            hideOverlayVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "hide_overlay_versions");
-            hidePackageVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "hide_package_versions");
+            cleanVersionLabels = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "clean_version_labels");
+            hideOverlayVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "hide_overlay_versions");
+            hidePackageVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "hide_package_versions");
             
             if (cleanVersionLabels.empty())
                 cleanVersionLabels = "false";
@@ -632,14 +632,14 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(VERSION_LABELS));
             
-            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_lang");
+            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_lang");
             
             
                
             auto toggleListItem = new tsl::elm::ToggleListItem(CLEAN_LABELS, false, ON, OFF);
             toggleListItem->setState((cleanVersionLabels == "true"));
             toggleListItem->setStateChangedListener([this, cleanVersionLabels, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "clean_version_labels", state ? "true" : "false");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "clean_version_labels", state ? "true" : "false");
                 if ((cleanVersionLabels == "true") != state) {
                     if (cleanVersionLabels == "false")
                         versionLabel = APP_VERSION+std::string("   (")+ extractTitle(loaderInfo)+" "+cleanVersionLabel(loaderInfo)+std::string(")"); // Still needs to parse nx-ovlloader instead of hard coding it
@@ -657,7 +657,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(OVERLAY_LABELS, false, ON, OFF);
             toggleListItem->setState((hideOverlayVersions == "false"));
             toggleListItem->setStateChangedListener([this, hideOverlayVersions, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_overlay_versions", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_overlay_versions", state ? "false" : "true");
                 if ((hideOverlayVersions == "false") != state)
                     reloadMenu = true;
             });
@@ -666,7 +666,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(PACKAGE_LABELS, false, ON, OFF);
             toggleListItem->setState((hidePackageVersions == "false"));
             toggleListItem->setStateChangedListener([this, hidePackageVersions, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_package_versions", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_package_versions", state ? "false" : "true");
                 if ((hidePackageVersions == "false") != state)
                     reloadMenu = true;
             });
@@ -2413,13 +2413,13 @@ public:
                     setIniFileValue(settingsConfigIniPath, "ultrapaw", "datetime_format", DEFAULT_DT_FORMAT);
                 
                 if (ultrahandSection.count("hide_clock") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_clock", "false");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_clock", "false");
                 if (ultrahandSection.count("hide_battery") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_battery", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_battery", "true");
                 if (ultrahandSection.count("hide_pcb_temp") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_pcb_temp", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_pcb_temp", "true");
                 if (ultrahandSection.count("hide_soc_temp") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_soc_temp", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_soc_temp", "true");
                 
                 //if (ultrahandSection.count("in_overlay") > 0) {
                 //    inOverlayString = ultrahandSection["in_overlay"];
