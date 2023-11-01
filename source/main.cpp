@@ -445,7 +445,7 @@ public:
                     if (languagesVersion == "latest")
                         languageDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/lang.zip", "/config/ultrapaw/downloads/");
                     else
-                        languageDownloaded = downloadFile(ultrahandRepo+"releases/download/v"+languagesVersion+"/lang.zip", "/config/ultrahand/downloads/");
+                        languageDownloaded = downloadFile(ultrahandRepo+"releases/download/v"+languagesVersion+"/lang.zip", "/config/ultrapaw/downloads/");
                     if (languageDownloaded) {
                         unzipFile("/config/ultrapaw/downloads/lang.zip", "/config/ultrapaw/downloads/lang/");
                         deleteFileOrDirectory("/config/ultrapaw/downloads/lang.zip");
@@ -474,7 +474,7 @@ public:
             std::string packageInfoString = "";
             
             packageSectionString += TITLE+'\n';
-            packageInfoString += std::string("Ultrahand Overlay")+'\n';
+            packageInfoString += std::string("Ultra Paw Overlay")+'\n';
             numEntries++;
             
             packageSectionString += VERSION+'\n';
@@ -482,12 +482,12 @@ public:
             numEntries++;
             
             packageSectionString += CREATOR+'\n';
-            packageInfoString += "b0rd2dEAth\n";
+            packageInfoString += "b0rd2dEAth, redraz, pugemon\n";
             numEntries++;
             
             std::string aboutHeaderText = ABOUT+'\n';
             std::string::size_type aboutHeaderLength = aboutHeaderText.length();
-            std::string aboutText = "Ultrahand Overlay is a versatile tool that enables you to create and share custom command-based packages.";
+            std::string aboutText = "Ultra Paw Overlay is a versatile tool that enables you to create and share custom command-based packages.";
             
             packageSectionString += aboutHeaderText;
             
@@ -522,7 +522,7 @@ public:
             
             std::string creditsHeaderText = CREDITS+'\n';
             std::string::size_type creditsHeaderLength = creditsHeaderText.length();
-            std::string creditsText = "Special thanks to B3711, ComplexNarrative, Faker_dev, MasaGratoR, meha, WerWolv, HookedBehemoth and many others. <3";
+            std::string creditsText = "Special thanks to Ultra Group in Telegram";
             
             packageSectionString += creditsHeaderText;
             
