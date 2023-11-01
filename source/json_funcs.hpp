@@ -8,6 +8,9 @@
  *   For the latest updates and contributions, visit the project's GitHub repository.
  *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
  *
+ *   Note: Please be aware that this notice cannot be altered or removed. It is a part
+ *   of the project's documentation and must remain intact.
+ *
  *  Copyright (c) 2023 ppkantorski
  *  All rights reserved.
  ********************************************************************************/
@@ -83,17 +86,82 @@ json_t* readJsonFromFile(const std::string& filePath) {
  * @return std::string The input string with the placeholder replaced by the actual JSON source,
  *                   or the original input string if replacement failed or jsonDict is nullptr.
  */
-//std::string replaceJsonPlaceholder(const std::string& arg, const std::string& commandName, const json_t* jsonDict) {
 std::string replaceJsonPlaceholder(const std::string& arg, const std::string& commandName, const std::string& jsonPathOrString) {
     json_t* jsonDict = nullptr;
     json_error_t error;
-    //FILE* hexFile = nullptr;
-    
+
     if (commandName == "json" || commandName == "json_source") {
         jsonDict = stringToJson(jsonPathOrString);
     } else if (commandName == "json_file" || commandName == "json_file_source") {
         jsonDict = json_load_file(jsonPathOrString.c_str(), 0, &error);
     }
+
+    std::string replacement = arg;
+    std::string searchString = "{" + commandName + "(";
+
+    std::size_t startPos = replacement.find(searchString);
+    std::size_t endPos = replacement.find(")}");
+    if (startPos != std::string::npos && endPos != std::string::npos && endPos > startPos) {
+        std::string placeholder = replacement.substr(startPos, endPos - startPos + 2);
+        
+        // Extract the keys and indexes from the placeholder
+        std::vector<std::string> keysAndIndexes;
+        size_t nextPos = startPos + searchString.length();
+
+        while (nextPos < endPos) {
+            size_t commaPos = replacement.find(',', nextPos);
+            if (commaPos != std::string::npos) {
+                keysAndIndexes.push_back(replacement.substr(nextPos, commaPos - nextPos));
+                nextPos = commaPos + 1;
+            } else {
+                keysAndIndexes.push_back(replacement.substr(nextPos, endPos - nextPos));
+                break;
+            }
+        }
+
+        json_t* value = jsonDict;
+        for (const std::string& keyIndex : keysAndIndexes) {
+            if (json_is_object(value)) {
+                value = json_object_get(value, keyIndex.c_str());
+            } else if (json_is_array(value)) {
+                size_t index = std::stoul(keyIndex);
+                value = json_array_get(value, index);
+            }
+
+            if (value == nullptr) {
+                // Key or index not found, stop further processing
+                break;
+            }
+        }
+
+        if (value != nullptr && json_is_string(value)) {
+            // Replace the placeholder with the JSON value
+            replacement.replace(startPos, endPos - startPos + 2, json_string_value(value));
+        }
+    }
+
+    // Free JSON data
+    if (jsonDict != nullptr) {
+        json_decref(jsonDict);
+    }
+
+    return replacement;
+}
+
+
+
+
+
+std::string replaceJsonPlaceholderF(const std::string& arg, const std::string& commandName, const std::string& jsonPathOrString, json_t*& jsonDict) {
+    //json_t* jsonDict = nullptr;
+    json_error_t error;
+    //FILE* hexFile = nullptr;
+    
+    //if (commandName == "json" || commandName == "json_source") {
+    //    jsonDict = stringToJson(jsonPathOrString);
+    //} else if (commandName == "json_file" || commandName == "json_file_source") {
+    //    jsonDict = json_load_file(jsonPathOrString.c_str(), 0, &error);
+    //}
     
     //logMessage("arg: "+arg);
     //logMessage("commandName: "+commandName);
@@ -158,12 +226,11 @@ std::string replaceJsonPlaceholder(const std::string& arg, const std::string& co
     }
     
     // Free jsonData1
-    if (jsonDict != nullptr) {
-        json_decref(jsonDict);
-        jsonDict = nullptr;
-    }
+    //if (jsonDict != nullptr) {
+    //    json_decref(jsonDict);
+    //    jsonDict = nullptr;
+    //}
     
     //json_decref(jsonDict);
     return replacement;
 }
-

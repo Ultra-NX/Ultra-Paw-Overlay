@@ -9,6 +9,9 @@
  *   For the latest updates and contributions, visit the project's GitHub repository.
  *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
  *
+ *   Note: Please be aware that this notice cannot be altered or removed. It is a part
+ *   of the project's documentation and must remain intact.
+ *
  *  Copyright (c) 2023 ppkantorski
  *  All rights reserved.
  ********************************************************************************/
@@ -26,66 +29,15 @@
 #include <json_funcs.hpp>
 #include <list_funcs.hpp>
 
+#include <payload.hpp> // Studious Pancake
+#include <util.hpp>
 
 
-/**
- * @brief Shutdown modes for the Ultrahand-Overlay project.
- *
- * These macros define the shutdown modes used in the Ultrahand-Overlay project:
- * - `SpsmShutdownMode_Normal`: Normal shutdown mode.
- * - `SpsmShutdownMode_Reboot`: Reboot mode.
- */
-#define SpsmShutdownMode_Normal 0
-#define SpsmShutdownMode_Reboot 1
+Payload::HekateConfigList const boot_config_list;
+Payload::HekateConfigList const ini_config_list;
+Payload::PayloadConfigList const payload_config_list;
 
-/**
- * @brief Key mapping macros for button keys.
- *
- * These macros define button keys for the Ultrahand-Overlay project to simplify key mappings.
- * For example, `KEY_A` represents the `HidNpadButton_A` key.
- */
-#define KEY_A HidNpadButton_A
-#define KEY_B HidNpadButton_B
-#define KEY_X HidNpadButton_X
-#define KEY_Y HidNpadButton_Y
-#define KEY_L HidNpadButton_L
-#define KEY_R HidNpadButton_R
-#define KEY_ZL HidNpadButton_ZL
-#define KEY_ZR HidNpadButton_ZR
-#define KEY_PLUS HidNpadButton_Plus
-#define KEY_MINUS HidNpadButton_Minus
-#define KEY_DUP HidNpadButton_Up
-#define KEY_DDOWN HidNpadButton_Down
-#define KEY_DLEFT HidNpadButton_Left
-#define KEY_DRIGHT HidNpadButton_Right
-#define KEY_SL HidNpadButton_AnySL
-#define KEY_SR HidNpadButton_AnySR
-#define KEY_LSTICK HidNpadButton_StickL
-#define KEY_RSTICK HidNpadButton_StickR
-#define KEY_UP (HidNpadButton_Up | HidNpadButton_StickLUp | HidNpadButton_StickRUp)
-#define KEY_DOWN (HidNpadButton_Down | HidNpadButton_StickLDown | HidNpadButton_StickRDown)
-#define KEY_LEFT (HidNpadButton_Left | HidNpadButton_StickLLeft | HidNpadButton_StickRLeft)
-#define KEY_RIGHT (HidNpadButton_Right | HidNpadButton_StickLRight | HidNpadButton_StickRRight)
 
-/**
- * @brief Ultrahand-Overlay Input Macros
- *
- * This block of code defines macros for handling input in the Ultrahand-Overlay project.
- * These macros simplify the mapping of input events to corresponding button keys and
- * provide aliases for touch and joystick positions.
- *
- * The macros included in this block are:
- *
- * - `touchPosition`: An alias for a constant `HidTouchState` pointer.
- * - `touchInput`: An alias for `&touchPos`, representing touch input.
- * - `JoystickPosition`: An alias for `HidAnalogStickState`, representing joystick input.
- *
- * These macros are utilized within the Ultrahand-Overlay project to manage and interpret
- * user input, including touch and joystick events.
- */
-#define touchPosition const HidTouchState
-#define touchInput &touchPos
-#define JoystickPosition HidAnalogStickState
 
 
 /**
@@ -105,18 +57,18 @@
  * These paths are used within the Ultrahand-Overlay project to manage configuration files
  * and directories.
  */
-const std::string bootPackageFileName = "boot_package.ini";
-const std::string packageFileName = "package.ini";
-const std::string configFileName = "config.ini";
-const std::string settingsPath = "sdmc:/config/ultrapaw/";
-const std::string settingsConfigIniPath = settingsPath + configFileName;
-const std::string themeConfigIniPath = settingsPath + "theme.ini";
-const std::string packageDirectory = "sdmc:/switch/.packages/";
-const std::string overlayDirectory = "sdmc:/switch/.overlays/";
-const std::string teslaSettingsConfigIniPath = "sdmc:/config/tesla/"+configFileName;
-const std::string overlaysIniFilePath = settingsPath + "overlays.ini";
-const std::string packagesIniFilePath = settingsPath + "packages.ini";
-
+static const std::string bootPackageFileName = "boot_package.ini";
+static const std::string packageFileName = "package.ini";
+static const std::string configFileName = "config.ini";
+static const std::string settingsPath = "sdmc:/config/ultrapaw/";
+static const std::string settingsConfigIniPath = settingsPath + configFileName;
+static const std::string themeConfigIniPath = settingsPath + "theme.ini";
+static const std::string packageDirectory = "sdmc:/switch/.packages/";
+static const std::string overlayDirectory = "sdmc:/switch/.overlays/";
+static const std::string teslaSettingsConfigIniPath = "sdmc:/config/tesla/"+configFileName;
+static const std::string overlaysIniFilePath = settingsPath + "overlays.ini";
+static const std::string packagesIniFilePath = settingsPath + "packages.ini";
+static const std::string ultrahandRepo = "https://github.com/Ultra-NX/Ultra-Paw-Overlay/";
 
 
 
@@ -127,7 +79,7 @@ const std::string packagesIniFilePath = settingsPath + "packages.ini";
  * This function retrieves the key combo from Tesla settings and copies it to Ultrahand settings.
  */
 void copyTeslaKeyComboToUltrahand() {
-    std::string keyCombo;
+    std::string keyCombo = "ZL+ZR+DDOWN";
     std::map<std::string, std::map<std::string, std::string>> parsedData;
     
     if (isFileOrDirectory(teslaSettingsConfigIniPath)) {
@@ -140,17 +92,18 @@ void copyTeslaKeyComboToUltrahand() {
         }
     }
     
-    if (!keyCombo.empty()){
-        if (isFileOrDirectory(settingsConfigIniPath)) {
-            parsedData = getParsedDataFromIniFile(settingsConfigIniPath);
-            if (parsedData.count("ultrapaw") > 0) {
-                auto& ultrahandSection = parsedData["ultrapaw"];
-                if (ultrahandSection.count("key_combo") == 0) {
-                    // Write the key combo to the destination file
-                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", keyCombo);
-                }
+    if (isFileOrDirectory(settingsConfigIniPath)) {
+        parsedData = getParsedDataFromIniFile(settingsConfigIniPath);
+        if (parsedData.count("ultrapaw") > 0) {
+            auto& ultrahandSection = parsedData["ultrapaw"];
+            if (ultrahandSection.count("key_combo") == 0) { // no entry present
+                // Write the key combo to the destination file
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", keyCombo);
             }
         }
+    } else {
+        // Write the key combo to the destination file
+        setIniFileValue(settingsConfigIniPath, "ultrahand", "key_combo", keyCombo);
     }
     tsl::impl::parseOverlaySettings();
 }
@@ -513,6 +466,44 @@ std::string replaceIniPlaceholder(const std::string& arg, const std::string& ini
     return replacement;
 }
 
+// `{hex_file(customAsciiPattern, offsetStr, length)}`
+std::string replaceIniPlaceholderF(const std::string& arg, const std::string& iniPath, FILE*& file) {
+    std::string replacement = arg;
+    std::string searchString = "{ini_file(";
+    
+    std::size_t startPos = replacement.find(searchString);
+    std::size_t endPos = replacement.find(")}");
+    
+    if (startPos != std::string::npos && endPos != std::string::npos && endPos > startPos) {
+        std::string placeholderContent = replacement.substr(startPos + searchString.length(), endPos - startPos - searchString.length());
+        
+        // Split the placeholder content into its components (customAsciiPattern, offsetStr, length)
+        std::vector<std::string> components;
+        std::istringstream componentStream(placeholderContent);
+        std::string component;
+        
+        while (std::getline(componentStream, component, ',')) {
+            components.push_back(trim(component));
+        }
+        
+        if (components.size() == 2) {
+            // Extract individual components
+            std::string iniSection = removeQuotes(components[0]);
+            std::string iniKey = removeQuotes(components[1]);
+            
+            // Call the parsing function and replace the placeholder
+            std::string parsedResult = parseValueFromIniSectionF(file, iniPath, iniSection, iniKey);
+            
+            //std::string parsedResult = customAsciiPattern+offsetStr;
+            
+            // Replace the entire placeholder with the parsed result
+            replacement.replace(startPos, endPos - startPos + searchString.length() + 2, parsedResult);
+        }
+    }
+    
+    return replacement;
+}
+
 
 
 
@@ -554,11 +545,14 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
             
             if (arg.find("{file_source}") != std::string::npos) {
                 arg = replacePlaceholder(arg, "{file_source}", entry);
-            } else if (arg.find("{file_name}") != std::string::npos) {
+            }
+            if (arg.find("{file_name}") != std::string::npos) {
                 arg = replacePlaceholder(arg, "{file_name}", getNameFromPath(entry));
-            } else if (arg.find("{folder_name}") != std::string::npos) {
+            }
+            if (arg.find("{folder_name}") != std::string::npos) {
                 arg = replacePlaceholder(arg, "{folder_name}", getParentDirNameFromPath(entry));
-            } else if (arg.find("{list_source(") != std::string::npos) {
+            }
+            if (arg.find("{list_source(") != std::string::npos) {
                 //arg = replacePlaceholder(arg, "{list_source}", entry);
                 arg = replacePlaceholder(arg, "*", std::to_string(entryIndex));
                 size_t startPos = arg.find("{list_source(");
@@ -567,7 +561,8 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
                     replacement = listData[entryIndex];
                     arg.replace(startPos, endPos - startPos + 2, replacement);
                 }
-            } else if (arg.find("{json_source(") != std::string::npos) {
+            }
+            if (arg.find("{json_source(") != std::string::npos) {
                 //std::string countStr = entry;
                 arg = replacePlaceholder(arg, "*", std::to_string(entryIndex));
                 size_t startPos = arg.find("{json_source(");
@@ -576,7 +571,8 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
                     replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json_source", jsonString);
                     arg.replace(startPos, endPos - startPos + 2, replacement);
                 }
-            } else if (arg.find("{json_file_source(") != std::string::npos) {
+            }
+            if (arg.find("{json_file_source(") != std::string::npos) {
                 //std::string countStr = entry;
                 arg = replacePlaceholder(arg, "*", std::to_string(entryIndex));
                 size_t startPos = arg.find("{json_file_source(");
@@ -601,6 +597,140 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
 
 
 
+void variableReplacement(std::vector<std::string>& cmd) {
+    std::string commandName;
+    std::string listString, jsonString, jsonPath, hexPath, iniPath;
+    std::string replacement;
+    
+    std::vector<std::string> listData;
+    
+    //FILE* hexFile = nullptr;
+    //FILE* iniFile = nullptr;
+    //json_t* jsonData1 = nullptr;
+    //json_t* jsonData2 = nullptr;
+    //json_error_t error;
+    
+    // Get the command name (first part of the command)
+    commandName = cmd[0];
+    
+    // Check for hex_file command and set hexPath
+    if (commandName == "ini_file") {
+        iniPath = preprocessPath(cmd[1]);
+        
+        //iniFile = fopen(iniPath.c_str(), "r");
+    } else if (commandName == "hex_file") { // Check for hex_file command and set hexPath
+        hexPath = preprocessPath(cmd[1]);
+        //hexFile = fopen(hexPath.c_str(), "rb");
+        
+    } else if (commandName == "json") {
+        jsonString = cmd[1];
+        //jsonData1 = stringToJson(jsonString);
+    } else if (commandName == "json_file") {
+        jsonPath = preprocessPath(cmd[1]);
+        //jsonData2 = json_load_file(jsonPath.c_str(), 0, &error);
+    } else if (commandName == "list") {
+        listString = removeQuotes(cmd[1]);
+        listData = stringToList(listString);
+    }
+    
+    // Process {hex_file(...)} placeholders
+    for (auto& arg : cmd) {
+        
+        if ((!iniPath.empty() && (arg.find("{ini_file(") != std::string::npos))) {
+            size_t startPos = arg.find("{ini_file(");
+            size_t endPos = arg.find(")}");
+            if (endPos != std::string::npos && endPos > startPos) {
+                replacement = replaceIniPlaceholder(arg.substr(startPos, endPos - startPos + 2), iniPath);
+                //replacement = replaceIniPlaceholderF(arg.substr(startPos, endPos - startPos + 2), iniPath, iniFile);
+                arg.replace(startPos, endPos - startPos + 2, replacement);
+            }
+        }
+        
+        
+        if (!hexPath.empty() && (arg.find("{hex_file(") != std::string::npos)) {
+            size_t startPos = arg.find("{hex_file(");
+            size_t endPos = arg.find(")}");
+            if (endPos != std::string::npos && endPos > startPos) {
+                replacement = replaceHexPlaceholder(arg.substr(startPos, endPos - startPos + 2), hexPath);
+                
+                //replacement = replaceHexPlaceholderF(arg.substr(startPos, endPos - startPos + 2), hexPath, hexFile);
+                arg.replace(startPos, endPos - startPos + 2, replacement);
+            }
+        }
+        
+        if ((!jsonString.empty() && (arg.find("{json(") != std::string::npos))) {
+            //std::string countStr = entry;
+            //arg = replacePlaceholder(arg, "*", entry);
+            size_t startPos = arg.find("{json(");
+            size_t endPos = arg.find(")}");
+            if (endPos != std::string::npos && endPos > startPos) {
+                //jsonData1 = stringToJson(jsonString);
+                replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json", jsonString);
+                //replacement = replaceJsonPlaceholderF(arg.substr(startPos, endPos - startPos + 2), "json", jsonString, jsonData1);
+                arg.replace(startPos, endPos - startPos + 2, replacement);
+                
+                //// Free jsonData1
+                //if (jsonData1 != nullptr) {
+                //    json_decref(jsonData1);
+                //    jsonData1 = nullptr;
+                //}
+            }
+        }
+        if ((!jsonPath.empty() && (arg.find("{json_file(") != std::string::npos))) {
+            //std::string countStr = entry;
+            //arg = replacePlaceholder(arg, "*", entry);
+            size_t startPos = arg.find("{json_file(");
+            size_t endPos = arg.find(")}");
+            if (endPos != std::string::npos && endPos > startPos) {
+                //jsonData2 = json_load_file(jsonPath.c_str(), 0, &error);
+                replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json_file", jsonPath);
+                //replacement = replaceJsonPlaceholderF(arg.substr(startPos, endPos - startPos + 2), "json_file", jsonPath, jsonData2);
+                //logMessage("Mid source replacement: " + replacement);
+                arg.replace(startPos, endPos - startPos + 2, replacement);
+                
+                //// Free jsonData2
+                //if (jsonData2 != nullptr) {
+                //    json_decref(jsonData2);
+                //    jsonData2 = nullptr;
+                //}
+            }
+        }
+        
+        if ((!listString.empty() && (arg.find("{list(") != std::string::npos))) {
+            size_t startPos = arg.find("{list(");
+            size_t endPos = arg.find(")}");
+            if (endPos != std::string::npos && endPos > startPos) {
+                int listIndex = stringToNumber(arg.substr(startPos, endPos - startPos + 2));
+                replacement = listData[listIndex];
+                arg.replace(startPos, endPos - startPos + 2, replacement);
+                
+                // Release the memory held by listData
+                //listData.clear();
+            }
+        }
+    }
+    
+    // Close the file
+    //fclose(iniFile);
+    // Close the file
+    //fclose(hexFile);
+    // Free jsonData1
+    //if (jsonData1 != nullptr) {
+    //    json_decref(jsonData1);
+    //    jsonData1 = nullptr;
+    //}
+    // Free jsonData2
+    //if (jsonData2 != nullptr) {
+    //    json_decref(jsonData2);
+    //    jsonData2 = nullptr;
+    //}
+    
+    // Release the memory held by listData
+    //listData.clear();
+    
+}
+
+
 /**
  * @brief Interpret and execute a list of commands.
  *
@@ -609,6 +739,13 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
  * @param commands A list of commands, where each command is represented as a vector of strings.
  */
 bool interpretAndExecuteCommand(const std::vector<std::vector<std::string>> commands, const std::string packagePath="", const std::string selectedCommand="") {
+    
+    //auto boot_config_list(Payload::LoadHekateConfigList());
+    //auto ini_config_list(Payload::LoadIniConfigList());
+    //auto payload_config_list(Payload::LoadPayloadList());
+    
+    
+    
     std::string commandName, bootCommandName, sourcePath, destinationPath, desiredSection, desiredNewSection, desiredKey, desiredNewKey, desiredValue, \
         offset, customPattern, hexDataToReplace, hexDataReplacement, fileUrl, clearOption;
     
@@ -622,8 +759,8 @@ bool interpretAndExecuteCommand(const std::vector<std::vector<std::string>> comm
     // inidialize data variables
     std::vector<std::string> listData;
     //json_t* jsonData1 = nullptr;
-    //json_t* jsonData2 = nullptr;
-    //json_error_t error;
+    json_t* jsonData2 = nullptr;
+    json_error_t error;
     //FILE* hexFile = nullptr;
     
     std::vector<std::string> command;
@@ -701,8 +838,10 @@ bool interpretAndExecuteCommand(const std::vector<std::vector<std::string>> comm
                 size_t startPos = arg.find("{json_file(");
                 size_t endPos = arg.find(")}");
                 if (endPos != std::string::npos && endPos > startPos) {
-                    //jsonData2 = json_load_file(jsonPath.c_str(), 0, &error);
                     replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json_file", jsonPath);
+                    
+                    //jsonData2 = json_load_file(jsonPath.c_str(), 0, &error);
+                    //replacement = replaceJsonPlaceholderF2(arg.substr(startPos, endPos - startPos + 2), "json_file", jsonData2);
                     //logMessage("Mid source replacement: " + replacement);
                     arg.replace(startPos, endPos - startPos + 2, replacement);
                     
@@ -1022,11 +1161,119 @@ bool interpretAndExecuteCommand(const std::vector<std::vector<std::string>> comm
                     bootOptions.clear();
                 }
             }
-        } else if (commandName == "reboot") {
-            // Reboot command
+        } else if (commandName == "reboot") { // credits to Studious Pancake for the Payload and utils methods
+            std::string rebootOption;
+            int rebootIndex = 0;
+            
+            
+            if (util::IsErista() || util::SupportsMarikoRebootToConfig()) {
+                if (command.size() >= 2) {
+                    rebootOption = removeQuotes(command[1]);
+                    
+                    
+                    if (command.size() >= 3) {
+                        
+                        if (rebootOption == "boot") {
+                            std::string option = removeQuotes(command[2]);
+                            Payload::HekateConfigList bootConfigList = Payload::LoadHekateConfigList();
+                            auto bootConfigIterator = bootConfigList.begin();  // Define the iterator here
+                            if (std::all_of(option.begin(), option.end(), ::isdigit)) {
+                                rebootIndex = std::stoi(option);
+                                
+                                std::advance(bootConfigIterator, rebootIndex);
+                                Payload::RebootToHekateConfig(*bootConfigIterator, false);
+                            
+                            } else { 
+                                std::string entryName = option;
+                                int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                                
+                                for (auto it = bootConfigList.begin(); it != bootConfigList.end(); ++it) {
+                                    if (it->name == entryName) {
+                                        // Match found, store the index and break the loop
+                                        rebootIndex = std::distance(bootConfigList.begin(), it);
+                                        bootConfigIterator = it;  // Update the iterator to the matching element
+                                        break;
+                                    }
+                                }
+                                
+                                if (rebootIndex != -1) {
+                                    Payload::RebootToHekateConfig(*bootConfigIterator, false);
+                                }
+                            }
+                            
+                        } else if (rebootOption == "ini") {
+                            std::string option = removeQuotes(command[2]);
+                            Payload::HekateConfigList iniConfigList = Payload::LoadIniConfigList();
+                            auto iniConfigIterator = iniConfigList.begin();
+                            if (std::all_of(option.begin(), option.end(), ::isdigit)) {
+                                rebootIndex = std::stoi(option);
+                                
+                                std::advance(iniConfigIterator, rebootIndex);
+                                Payload::RebootToHekateConfig(*iniConfigIterator, true);
+                            
+                            } else { 
+                                std::string entryName = option;
+                                int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                                
+                                for (auto it = iniConfigList.begin(); it != iniConfigList.end(); ++it) {
+                                    if (it->name == entryName) {
+                                        // Match found, store the index and break the loop
+                                        rebootIndex = std::distance(iniConfigList.begin(), it);
+                                        iniConfigIterator = it;  // Update the iterator to the matching element
+                                        break;
+                                    }
+                                }
+                                
+                                if (rebootIndex != -1) {
+                                    Payload::RebootToHekateConfig(*iniConfigIterator, true);
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (rebootOption == "UMS")
+                        Payload::RebootToHekateUMS(Payload::UmsTarget_Sd);
+                    else if (isFileOrDirectory(rebootOption)) {
+                        std::string fileName = getNameFromPath(rebootOption);
+                        if (util::IsErista()) {
+                            Payload::PayloadConfig reboot_payload = {fileName, rebootOption};
+                            Payload::RebootToPayload(reboot_payload);
+                        } else {
+                            setIniFileValue("/bootloader/ini/" + fileName + ".ini", fileName, "payload", rebootOption); // generate entry
+                            Payload::HekateConfigList iniConfigList = Payload::LoadIniConfigList();
+                            
+                            int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                            auto iniConfigIterator = iniConfigList.begin();  // Define the iterator here
+                            
+                            for (auto it = iniConfigList.begin(); it != iniConfigList.end(); ++it) {
+                                if (it->name == fileName) {
+                                    // Match found, store the index and break the loop
+                                    rebootIndex = std::distance(iniConfigList.begin(), it);
+                                    iniConfigIterator = it;  // Update the iterator to the matching element
+                                    break;
+                                }
+                            }
+                            
+                            if (rebootIndex != -1) {
+                                // A matching entry was found in the iniConfigList
+                                //deleteFileOrDirectory("/bootloader/ini/" + fileName + ".ini");
+                                Payload::RebootToHekateConfig(*iniConfigIterator, true);
+                            }
+                        }
+                    }
+                }
+                
+                if (rebootOption.empty())
+                    Payload::RebootToHekate();
+            }
+            
+            // Fall back reboot command
+            i2cExit();
             splExit();
             fsdevUnmountAll();
             spsmShutdown(SpsmShutdownMode_Reboot);
+            
+            
         } else if (commandName == "shutdown") {
             // Reboot command
             splExit();
