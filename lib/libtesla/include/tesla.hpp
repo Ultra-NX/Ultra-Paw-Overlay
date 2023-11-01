@@ -421,7 +421,7 @@ void parseLanguage(std::string langFile) {
     updateIfNotEmpty(LANGUAGE, "LANGUAGE", langData);
     updateIfNotEmpty(OVERLAY_INFO, "OVERLAY_INFO", langData);
     updateIfNotEmpty(SOFTWARE_UPDATE, "SOFTWARE_UPDATE", langData);
-    updateIfNotEmpty(UPDATE_ULTRAHAND, "UPDATE_ULTRA_PAW", langData);
+    updateIfNotEmpty(UPDATE_ULTRAHAND, "UPDATE_ULTRAHAND", langData);
     updateIfNotEmpty(UPDATE_LANGUAGES, "UPDATE_LANGUAGES", langData);
     updateIfNotEmpty(ROOT_PACKAGE, "ROOT_PACKAGE", langData);
     updateIfNotEmpty(SORT_PRIORITY, "SORT_PRIORITY", langData);
