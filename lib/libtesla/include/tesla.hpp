@@ -1051,7 +1051,7 @@ namespace tsl {
         namespace color {
             constexpr Color ColorFrameBackground  = { 0x0, 0x0, 0x0, 0xA };   ///< Overlay frame background color
             constexpr Color ColorTransparent      = { 0x0, 0x0, 0x0, 0x0 };   ///< Transparent color
-            constexpr Color ColorHighlight        = { 0x0, 0xE, 0x0, 0xF };   ///< Greenish highlight color
+            constexpr Color ColorHighlight        = { 0x0, 0xC, 0xF, 0xF };   ///< Greenish highlight color
             constexpr Color ColorFrame            = { 0x0, 0x0, 0x0, 0x0 };   ///< Outer boarder color // CUSTOM MODIFICATION
             constexpr Color ColorHandle           = { 0x0, 0x0, 0x0, 0x0 };   ///< Track bar handle color
             constexpr Color ColorText             = { 0xC, 0xC, 0xC, 0xF };   ///< Standard text color
