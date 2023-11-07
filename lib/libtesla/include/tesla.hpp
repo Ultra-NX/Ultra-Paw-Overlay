@@ -2157,11 +2157,6 @@ namespace tsl {
             std::string selectionBGColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_bg_color");
             Color selectionBGColor = RGB888(selectionBGColorStr, "#000000");
             
-            std::string disableSelectionBGStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_selection_bg");
-            bool disableSelectionBG = (!disableSelectionBGStr.empty() && disableSelectionBGStr != "false");
-            std::string selectionBGColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_bg_color");
-            Color selectionBGColor = RGB888(selectionBGColorStr, "#000000");
-            
             std::string highlightColor1Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_1");
             std::string highlightColor2Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_2");
             
@@ -2624,9 +2619,6 @@ namespace tsl {
             std::string disableColorfulLogoStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_colorful_logo");
             bool disableColorfulLogo = (!disableColorfulLogoStr.empty() && disableColorfulLogoStr == "true");
             
-            std::string disableColorfulLogoStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_colorful_logo");
-            bool disableColorfulLogo = (!disableColorfulLogoStr.empty() && disableColorfulLogoStr == "true");
-            
             std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             std::string clockColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "clock_color");
@@ -2684,8 +2676,15 @@ namespace tsl {
                     
                     countOffset = 0;
                     
+                    // Calculate the position for the second half based on the width of the first half
+                    //int x2 = x1 + (firstHalf.length() * fontSize)/2 -2;
+                    
+                    // Draw the second half of the string in red color
+                    renderer->drawString(firstHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0xF, 0xF, 0xF));
+                    
+
                     if (!disableColorfulLogo) {
-                        for (char letter : firstHalf) {
+                        for (char letter : secondHalf) {
                             
                             // Calculate the progress for each letter based on the counter
                             //progress = calculateAmplitude(counter - x * 0.001F);
@@ -2706,7 +2705,7 @@ namespace tsl {
                             //renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, a(highlightColor));
                             
                             // Call the renderer->drawString function
-                            renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, highlightColor);
+                            renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, highlightColor);
                             
                             // Manually calculate the width of the current letter
                             letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
@@ -2718,8 +2717,8 @@ namespace tsl {
                             countOffset -= 0.2F;
                         }
                     } else {
-                        for (char letter : firstHalf) {
-                            renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, tsl::Color(0xF,0xF,0xF,0xF));
+                        for (char letter : secondHalf) {
+                            renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, tsl::Color(0xF,0xF,0xF,0xF));
                             
                             // Manually calculate the width of the current letter
                             letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
@@ -2731,14 +2730,6 @@ namespace tsl {
                             countOffset -= 0.2F;
                         }
                     }
-                    
-                    
-                    
-                    // Calculate the position for the second half based on the width of the first half
-                    //int x2 = x1 + (firstHalf.length() * fontSize)/2 -2;
-                    
-                    // Draw the second half of the string in red color
-                    renderer->drawString(secondHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0x0, 0x0, 0xF));
                     
                     
                     // Time drawing implementation
@@ -3474,7 +3465,7 @@ namespace tsl {
         public:
             std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color"); // CUSTOM MODIFICATION
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
-            std::string selectedTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "selection_text_color");
+            std::string selectedTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_text_color");
             tsl::Color selectedTextColor = RGB888(selectedTextColorStr);
             
             std::chrono::system_clock::time_point timeIn;// = std::chrono::system_clock::now();

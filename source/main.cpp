@@ -264,7 +264,7 @@ public:
             list->addItem(new tsl::elm::CategoryHeader(UI_SETTINGS));
             
             
-            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "current_theme");
+            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "current_theme");
             if (currentTheme.empty() || currentTheme == "default")
                 currentTheme = DEFAULT;
             listItem = new tsl::elm::ListItem(THEME);
@@ -596,7 +596,7 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(THEME));
             
-            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "current_theme");
+            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "current_theme");
             
             if (currentTheme.empty())
                 currentTheme = "default";
@@ -616,7 +616,7 @@ public:
                 if (keys & KEY_A) {
                     
                     //if (defaultLangMode != defaultLang) {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "current_theme", "default");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "current_theme", "default");
                     deleteFileOrDirectory(themeConfigIniPath);
                     
                     if (isFileOrDirectory(defaultTheme)) {
@@ -658,9 +658,9 @@ public:
                 listItem->setClickListener([this, themeName, currentTheme, themeFile, listItem](uint64_t keys) { // Add 'this', 'i', and 'listItem' to the capture list
                     if (keys & KEY_A) {
                         //if (defaultLangMode != defaultLang) {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "current_theme", themeName);
-                        deleteFileOrDirectory("/config/ultrahand/theme.ini");
-                        copyFileOrDirectory(themeFile, "/config/ultrahand/theme.ini");
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "current_theme", themeName);
+                        deleteFileOrDirectory("/config/ultrapaw/theme.ini");
+                        copyFileOrDirectory(themeFile, "/config/ultrapaw/theme.ini");
                         
                         reloadMenu = true;
                         reloadMenu2 = true;
