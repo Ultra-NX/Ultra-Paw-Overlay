@@ -26,6 +26,8 @@
     "SOFTWARE_UPDATE": "Обновление",
     "UPDATE_ULTRAHAND": "Обновить Ultra Paw",
     "UPDATE_LANGUAGES": "Обновить локализацию",
+    "THEME": "Тема",
+    "DEFAULT": "По-умолчанию",
     "ROOT_PACKAGE": "Корневой пакет",
     "SORT_PRIORITY": "Приоритет сортировки",
     "FAILED_TO_OPEN": "Не удалось открыть",

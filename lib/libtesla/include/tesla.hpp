@@ -66,7 +66,8 @@
 #include "../../../source/get_funcs.hpp"
 #include "../../../source/string_funcs.hpp"
 #include "../../../source/ini_funcs.hpp"
-
+#include "../../../common/half.hpp"
+using half_float::half;
 
 /**
  * @brief Shutdown modes for the Ultrahand-Overlay project.
@@ -141,6 +142,15 @@ static const std::string DROPDOWN_SYMBOL = "\u25B6";
 static const std::string CHECKMARK_SYMBOL = "\uE14B";
 static const std::string CROSSMARK_SYMBOL = "\uE14C";
 static const std::string STAR_SYMBOL = "\u2605";
+
+
+float customRound(float num) {
+    if (num >= 0) {
+        return floor(num + 0.5);
+    } else {
+        return ceil(num - 0.5);
+    }
+}
 
 // English string definitions
 
@@ -226,6 +236,8 @@ static std::string OVERLAY_INFO = "Overlay Info";
 static std::string SOFTWARE_UPDATE = "Software Update";
 static std::string UPDATE_ULTRAHAND = "Update Ultra Paw";
 static std::string UPDATE_LANGUAGES = "Update Languages";
+static std::string THEME = "Theme";
+static std::string DEFAULT = "default";
 static std::string ROOT_PACKAGE = "Root Package";
 static std::string SORT_PRIORITY = "Sort Priority";
 static std::string FAILED_TO_OPEN = "Failed to open file";
@@ -318,6 +330,8 @@ void reinitializeLangVars() {
     SOFTWARE_UPDATE = "Software Update";
     UPDATE_ULTRAHAND = "Update Ultra Paw";
     UPDATE_LANGUAGES = "Update Languages";
+    THEME = "Theme";
+    DEFAULT = "default";
     ROOT_PACKAGE = "Root Package";
     SORT_PRIORITY = "Sort Priority";
     FAILED_TO_OPEN = "Failed to open file";
@@ -423,6 +437,8 @@ void parseLanguage(std::string langFile) {
     updateIfNotEmpty(SOFTWARE_UPDATE, "SOFTWARE_UPDATE", langData);
     updateIfNotEmpty(UPDATE_ULTRAHAND, "UPDATE_ULTRAHAND", langData);
     updateIfNotEmpty(UPDATE_LANGUAGES, "UPDATE_LANGUAGES", langData);
+    updateIfNotEmpty(THEME, "THEME", langData);
+    updateIfNotEmpty(DEFAULT, "DEFAULT", langData);
     updateIfNotEmpty(ROOT_PACKAGE, "ROOT_PACKAGE", langData);
     updateIfNotEmpty(SORT_PRIORITY, "SORT_PRIORITY", langData);
     updateIfNotEmpty(FAILED_TO_OPEN, "FAILED_TO_OPEN", langData);
@@ -1706,10 +1722,10 @@ namespace tsl {
              * @param color Text color. Use transparent color to skip drawing and only get the string's dimensions
              * @return Dimensions of drawn string
              */
-            std::pair<u32, u32> drawString(const char* string, bool monospace, s32 x, s32 y, float fontSize, Color color, ssize_t maxWidth = 0) {
-                s32 maxX = x;
-                s32 currX = x;
-                s32 currY = y;
+            std::pair<u32, u32> drawString(const char* string, bool monospace, float x, float y, float fontSize, Color color, ssize_t maxWidth = 0) {
+                float maxX = x;
+                float currX = x;
+                float currY = y;
 
                 struct Glyph {
                     stbtt_fontinfo *currFont;
@@ -2136,11 +2152,25 @@ namespace tsl {
             Element() {}
             virtual ~Element() { }
             
+            std::string disableSelectionBGStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_selection_bg");
+            bool disableSelectionBG = (!disableSelectionBGStr.empty() && disableSelectionBGStr != "false");
+            std::string selectionBGColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_bg_color");
+            Color selectionBGColor = RGB888(selectionBGColorStr, "#000000");
+            
+            std::string disableSelectionBGStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_selection_bg");
+            bool disableSelectionBG = (!disableSelectionBGStr.empty() && disableSelectionBGStr != "false");
+            std::string selectionBGColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_bg_color");
+            Color selectionBGColor = RGB888(selectionBGColorStr, "#000000");
+            
             std::string highlightColor1Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_1");
             std::string highlightColor2Str = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "highlight_color_2");
             
             Color highlightColor1 = RGB888(highlightColor1Str, "#2288CC");
             Color highlightColor2 = RGB888(highlightColor2Str, "#88FFFF");
+            Color highlightColor = a({0xf,0xf,0xf,0xf});
+            
+            std::chrono::duration<long int, std::ratio<1, 1000000000>> t;
+            //double timeCounter;
             
             /**
              * @brief Handles focus requesting
@@ -2221,21 +2251,15 @@ namespace tsl {
              * @param renderer
              */
             void frame(gfx::Renderer *renderer) {
-                renderer->enableScissoring(0, 0, tsl::cfg::FramebufferWidth, tsl::cfg::FramebufferHeight);
-
-                if (this->m_focused)
+                
+                if (this->m_focused) {
+                    renderer->enableScissoring(0, 97, tsl::cfg::FramebufferWidth, tsl::cfg::FramebufferHeight-73-97);
                     this->drawFocusBackground(renderer);
-
-                renderer->disableScissoring();
-
-                this->draw(renderer);
-
-                renderer->enableScissoring(0, 0, tsl::cfg::FramebufferWidth, tsl::cfg::FramebufferHeight);
-
-                if (this->m_focused)
                     this->drawHighlight(renderer);
-
-                renderer->disableScissoring();
+                    renderer->disableScissoring();
+                }
+                
+                this->draw(renderer);
             }
 
             /**
@@ -2300,7 +2324,8 @@ namespace tsl {
              * @param renderer Renderer
              */
             virtual void drawFocusBackground(gfx::Renderer *renderer) {
-                renderer->drawRect(ELEMENT_BOUNDS(this), a(0xF000));
+                if (!disableSelectionBG)
+                    renderer->drawRect(ELEMENT_BOUNDS(this), selectionBGColor); // CUSTOM MODIFICATION 
 
                 if (this->m_clickAnimationProgress > 0) {
                     this->drawClickAnimation(renderer);
@@ -2323,15 +2348,13 @@ namespace tsl {
                 
                 
                 // Get the current time
-                auto currentTime = std::chrono::system_clock::now();
-                auto timeInSeconds = std::chrono::duration<double>(currentTime.time_since_epoch()).count();
-
+                
                 // Calculate the progress for one full sine wave per second
-                const double cycleDuration = 1.0;  // 1 second for one full sine wave
-                double timeCounter = fmod(timeInSeconds, cycleDuration);
-                float progress = (std::sin(2 * M_PI * timeCounter / cycleDuration) + 1) / 2;
+                //const double cycleDuration = 1.0;  // 1 second for one full sine wave
+                //double timeCounter = 
+                half progress = half((std::sin(2.0 * M_PI * fmod(std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(), 1.0)) + 1.0) / 2.0);
 
-                Color highlightColor = {
+                highlightColor = {
                     static_cast<u8>((highlightColor1.r - highlightColor2.r) * progress + highlightColor2.r),
                     static_cast<u8>((highlightColor1.g - highlightColor2.g) * progress + highlightColor2.g),
                     static_cast<u8>((highlightColor1.b - highlightColor2.b) * progress + highlightColor2.b),
@@ -2340,7 +2363,7 @@ namespace tsl {
                 s32 x = 0, y = 0;
 
                 if (this->m_highlightShaking) {
-                    auto t = (std::chrono::system_clock::now() - this->m_highlightShakingStartTime);
+                    t = (std::chrono::system_clock::now() - this->m_highlightShakingStartTime);
                     if (t >= 100ms)
                         this->m_highlightShaking = false;
                     else {
@@ -2372,7 +2395,8 @@ namespace tsl {
                 renderer->drawRect(this->getX() + x - 4, this->getY() + y + this->getHeight(), this->getWidth() + 8, 4, a(highlightColor));
                 renderer->drawRect(this->getX() + x - 4, this->getY() + y, 4, this->getHeight(), a(highlightColor));
                 renderer->drawRect(this->getX() + x + this->getWidth(), this->getY() + y, 4, this->getHeight(), a(highlightColor));
-
+                
+                //renderer->drawRect(ELEMENT_BOUNDS(this), a(0xF000)); // This has been moved here (needs to be toggleable)
             }
             
             
@@ -2524,7 +2548,11 @@ namespace tsl {
             virtual ~CustomDrawer() {}
 
             virtual void draw(gfx::Renderer* renderer) override {
-                renderer->enableScissoring(ELEMENT_BOUNDS(this));
+                //renderer->enableScissoring(ELEMENT_BOUNDS(this));
+                //this->m_renderFunc(renderer, ELEMENT_BOUNDS(this));
+                //renderer->disableScissoring();
+                
+                renderer->enableScissoring(0, 97, tsl::cfg::FramebufferWidth, tsl::cfg::FramebufferHeight-73-97); // CUSTOM MODIFICATION (bug fix with renderer)
                 this->m_renderFunc(renderer, ELEMENT_BOUNDS(this));
                 renderer->disableScissoring();
             }
@@ -2548,7 +2576,7 @@ namespace tsl {
                 // Lookup the width of the current character
                 float letterWidth = characterWidths[letter];
                 if (letterWidth == 0) {
-                    letterWidth = 0.33;
+                    letterWidth = 0.33; // default width
                 }
                 
                 // Accumulate the width
@@ -2593,13 +2621,28 @@ namespace tsl {
             std::string m_pageLeftName; // CUSTOM MODIFICATION
             std::string m_pageRightName; // CUSTOM MODIFICATION
             
+            std::string disableColorfulLogoStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_colorful_logo");
+            bool disableColorfulLogo = (!disableColorfulLogoStr.empty() && disableColorfulLogoStr == "true");
+            
+            std::string disableColorfulLogoStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "disable_colorful_logo");
+            bool disableColorfulLogo = (!disableColorfulLogoStr.empty() && disableColorfulLogoStr == "true");
+            
             std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color");
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             std::string clockColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "clock_color");
             tsl::Color clockColor = RGB888(clockColorStr);
             std::string batteryColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "battery_color");
             tsl::Color batteryColor = RGB888(batteryColorStr);
-            
+            tsl::Color highlightColor = {0xF, 0xF, 0xF, 0xF};
+            std::string firstHalf, secondHalf;
+            const double cycleDuration = 1.5;
+            float counter = 0;
+            float countOffset;
+            double timeInSeconds;
+            float progress;
+            float letterWidth;
+            float x, y;
+            int fontSize;
             
             OverlayFrame(const std::string& title, const std::string& subtitle, const std::string& menuMode = "", const std::string& colorSelection = "", const std::string& pageLeftName = "", const std::string& pageRightName = "")
                 : Element(), m_menuMode(menuMode), m_title(title), m_subtitle(subtitle), m_colorSelection(colorSelection), m_pageLeftName(pageLeftName), m_pageRightName(pageRightName) {} // CUSTOM MODIFICATION
@@ -2612,70 +2655,90 @@ namespace tsl {
             // CUSTOM SECTION START
             virtual void draw(gfx::Renderer *renderer) override {
                 renderer->fillScreen(a(tsl::style::color::ColorFrameBackground));
-                renderer->drawRect(tsl::cfg::FramebufferWidth - 1, 0, 1, tsl::cfg::FramebufferHeight, a(0xF222));
+                //renderer->drawRect(tsl::cfg::FramebufferWidth - 1, 0, 1, tsl::cfg::FramebufferHeight, a(0xF222)); // CUSTOM MODIFICATION, not sure why this call was even necessary after comparisons.
                 
-                int y = 50;
+                y = 50;
                 int offset = 0;
-                // Check if m_title is "Ultra Paw"
+                // Check if m_title is "Ultrahand"
                 if (this->m_title == "Ultra Paw" && this->m_subtitle != "Ultra Paw Package" && this->m_subtitle != "Ultra Paw Script") {
-                    static float counter = 0;
-                    std::string firstHalf = "Ultra";
-                    std::string secondHalf = "Paw";
+                    firstHalf = "Ultra";
+                    secondHalf = "Paw";
                     
-                    float x = 20;
-                    int fontSize = 42;
+                    x = 20;
+                    fontSize = 42;
                     offset = 6;
                     
                     // Draw the first half of the string in white color
-                    static Color highlightColor = {0xF, 0xF, 0xF, 0xF};
-                    static float progress;
-                    float letterWidth;
+                    //static Color highlightColor = {0xF, 0xF, 0xF, 0xF};
                     
                     
                     // Get the current time
-                    static double timeInSeconds;
+                    //static double timeInSeconds;
                     
                     // Calculate the progress for one full sine wave per second
-                    const double cycleDuration = 1.5;  // for one full sine wave
-                    static double timeCounter;// = fmod(timeInSeconds, cycleDuration);
+                    //const double cycleDuration = 1.5;  // for one full sine wave
+                    //static double timeCounter;// = fmod(timeInSeconds, cycleDuration);
                     //float progress = calculateAmplitude(2 * M_PI * timeCounter / cycleDuration);
                     
                     
-                    float countOffset = 0;
                     
-                    // Draw the second half of the string in red color
-                    renderer->drawString(firstHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0xF, 0xF, 0xF));
-                    for (char letter : secondHalf) {
-                        // Calculate the progress for each letter based on the counter
-                        //progress = calculateAmplitude(counter - x * 0.001F);
-                        timeInSeconds = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
-                        timeCounter = fmod(timeInSeconds, cycleDuration);
-                        counter = (2 * M_PI * (timeCounter + countOffset) / cycleDuration);
-                        //progress = calculateAmplitude(counter);
-                        progress = (std::sin(counter) + 1) / 2;
-                        
-                        
-                        // Calculate the corresponding highlight color for each letter
-                        highlightColor = {
-                            static_cast<u8>((0xA - 0xF) * (3 - 1.5*progress) + 0xF),
-                            static_cast<u8>((0xA - 0xF) * 1.5*progress + 0xF),
-                            static_cast<u8>((0xA - 0xF) * (1.25 - progress) + 0xF),
-                            0xF
-                        };
-                        
-                        // Draw each character with its corresponding highlight color
-                        renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, a(highlightColor));
-                        
-                        // Manually calculate the width of the current letter
-                        letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
-                        
-                        // Adjust the x-coordinate for the next character's position
-                        x += letterWidth;
-                        
-                        // Update the counter for the next character
-                        countOffset -= 0.2F;
+                    countOffset = 0;
+                    
+                    if (!disableColorfulLogo) {
+                        for (char letter : firstHalf) {
+                            
+                            // Calculate the progress for each letter based on the counter
+                            //progress = calculateAmplitude(counter - x * 0.001F);
+                            counter = (2 * M_PI * (fmod(std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(), cycleDuration) + countOffset) / 1.5);
+                            //progress = calculateAmplitude(counter);
+                            progress = (std::sin(counter) + 1) / 2;
+                            
+                            
+                            // Calculate the corresponding highlight color for each letter
+                            highlightColor = {
+                                static_cast<u8>((0xA - 0xF) * (3 - 1.5*progress) + 0xF),
+                                static_cast<u8>((0xA - 0xF) * 1.5*progress + 0xF),
+                                static_cast<u8>((0xA - 0xF) * (1.25 - progress) + 0xF),
+                                0xF
+                            };
+                            
+                            // Draw each character with its corresponding highlight color
+                            //renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, a(highlightColor));
+                            
+                            // Call the renderer->drawString function
+                            renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, highlightColor);
+                            
+                            // Manually calculate the width of the current letter
+                            letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
+                            
+                            // Adjust the x-coordinate for the next character's position
+                            x += letterWidth;
+                            
+                            // Update the counter for the next character
+                            countOffset -= 0.2F;
+                        }
+                    } else {
+                        for (char letter : firstHalf) {
+                            renderer->drawString(std::string(1, letter).c_str(), false, x, y + offset, fontSize, tsl::Color(0xF,0xF,0xF,0xF));
+                            
+                            // Manually calculate the width of the current letter
+                            letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
+                            
+                            // Adjust the x-coordinate for the next character's position
+                            x += letterWidth;
+                            
+                            // Update the counter for the next character
+                            countOffset -= 0.2F;
+                        }
                     }
                     
+                    
+                    
+                    // Calculate the position for the second half based on the width of the first half
+                    //int x2 = x1 + (firstHalf.length() * fontSize)/2 -2;
+                    
+                    // Draw the second half of the string in red color
+                    renderer->drawString(secondHalf.c_str(), false, x, y+offset, fontSize, tsl::Color(0xF, 0x0, 0x0, 0xF));
                     
                     
                     // Time drawing implementation
@@ -2850,10 +2913,11 @@ namespace tsl {
                 }
                 
                 //if (this->m_title != "Ultrahand")
-                if (this->m_title == "Ultra Paw")
+                if (this->m_title == "Ultra Paw") {
                     renderer->drawString(versionLabel.c_str(), false, 20, y+20+offset, 15, a(tsl::style::color::ColorDescription));
-                else
+                } else
                     renderer->drawString(this->m_subtitle.c_str(), false, 20, y+20+offset, 15, a(tsl::style::color::ColorDescription));
+                
                 renderer->drawRect(15, tsl::cfg::FramebufferHeight - 73, tsl::cfg::FramebufferWidth - 30, 1, a(defaultTextColor));
                 
                 std::string menuBottomLine = "\uE0E1"+GAP_2+BACK+GAP_1+"\uE0E0"+GAP_2+OK+GAP_1;
@@ -3091,7 +3155,7 @@ namespace tsl {
             
             std::string trackBarColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "trackbar_color");
             Color trackBarColor = RGB888(trackBarColorStr, "#555555");
-
+            
             virtual void draw(gfx::Renderer *renderer) override {
                 
                 
@@ -3149,9 +3213,12 @@ namespace tsl {
                     float scrollbarHeight = static_cast<float>(this->getHeight() * this->getHeight()) / this->m_listHeight;
                     float scrollbarOffset = (static_cast<double>(this->m_offset)) / static_cast<double>(this->m_listHeight - this->getHeight()) * (this->getHeight() - std::ceil(scrollbarHeight));
 
-                    renderer->drawRect(this->getRightBound() + 10, this->getY() + scrollbarOffset, 5, scrollbarHeight - 50, trackBarColor);
-                    renderer->drawCircle(this->getRightBound() + 12, this->getY() + scrollbarOffset, 2, true, trackBarColor);
-                    renderer->drawCircle(this->getRightBound() + 12, this->getY() + scrollbarOffset + scrollbarHeight - 50, 2, true, trackBarColor);
+                    renderer->drawRect(this->getRightBound() + 10+2, this->getY() + scrollbarOffset, 5, scrollbarHeight - 50, trackBarColor);
+                    renderer->drawCircle(this->getRightBound() + 12+2, this->getY() + scrollbarOffset, 2, true, trackBarColor);
+                    renderer->drawCircle(this->getRightBound() + 12+2, ( this->getY() + scrollbarOffset + (this->getY() + scrollbarOffset + this->getY() + scrollbarOffset + scrollbarHeight - 50)/2)/2, 2, true, trackBarColor);
+                    renderer->drawCircle(this->getRightBound() + 12+2, (this->getY() + scrollbarOffset + this->getY() + scrollbarOffset + scrollbarHeight - 50)/2, 2, true, trackBarColor);
+                    renderer->drawCircle(this->getRightBound() + 12+2, (this->getY() + scrollbarOffset + scrollbarHeight - 50 + (this->getY() + scrollbarOffset + this->getY() + scrollbarOffset + scrollbarHeight - 50)/2)/2, 2, true, trackBarColor);
+                    renderer->drawCircle(this->getRightBound() + 12+2, this->getY() + scrollbarOffset + scrollbarHeight - 50, 2, true, trackBarColor);
 
                     float prevOffset = this->m_offset;
 
@@ -3407,7 +3474,11 @@ namespace tsl {
         public:
             std::string defaultTextColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "text_color"); // CUSTOM MODIFICATION
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
-            std::chrono::system_clock::time_point timeIn = std::chrono::system_clock::now();
+            std::string selectedTextColorStr = parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "selection_text_color");
+            tsl::Color selectedTextColor = RGB888(selectedTextColorStr);
+            
+            std::chrono::system_clock::time_point timeIn;// = std::chrono::system_clock::now();
+            std::chrono::duration<long int, std::ratio<1, 1000000000>> t;
             
             /**
              * @brief Constructor
@@ -3440,7 +3511,7 @@ namespace tsl {
                         auto [width, height] = renderer->drawString(this->m_scrollText.c_str(), false, 0, 0, 23, tsl::style::color::ColorTransparent);
                         this->m_scrollText += this->m_text;
                         this->m_textWidth = width;
-                        this->m_ellipsisText = renderer->limitStringLength(this->m_text, false, 22, this->m_maxWidth);
+                        this->m_ellipsisText = renderer->limitStringLength(this->m_text, false, 24, this->m_maxWidth);
                     } else {
                         this->m_textWidth = width;
                     }
@@ -3451,36 +3522,40 @@ namespace tsl {
 
                 if (this->m_trunctuated) {
                     if (this->m_focused) {
-                        renderer->enableScissoring(this->getX(), this->getY(), this->m_maxWidth + 40, this->getHeight());
-                        renderer->drawString(this->m_scrollText.c_str(), false, this->getX() + 20 - this->m_scrollOffset, this->getY() + 45, 23, defaultTextColor);
+                        renderer->enableScissoring(this->getX(), 97, this->m_maxWidth + 40, tsl::cfg::FramebufferHeight-73-97);
+                        //renderer->enableScissoring(this->getX(), this->getY(), this->m_maxWidth + 40, this->getHeight());
+                        //renderer->drawString(this->m_scrollText.c_str(), false, this->getX() + 20.0 - std::round(this->m_scrollOffset*10000.0)/10000.0, this->getY() + 45, 23, defaultTextColor);
+                        renderer->drawString(this->m_scrollText.c_str(), false, this->getX() + 20.0 - this->m_scrollOffset, this->getY() + 45, 23, selectedTextColor);
                         renderer->disableScissoring();
-                        //auto currentTime = std::chrono::system_clock::now(); 
-                        auto t = std::chrono::system_clock::now() - this->timeIn; // CUSTOM MODIFICATION START
-                        if (t > 2000ms) {
+                        t = std::chrono::system_clock::now() - this->timeIn;
+                        if (t >= 2000ms) {
                             if (this->m_scrollOffset >= this->m_textWidth) {
                                 this->m_scrollOffset = 0;
-                                this->m_scrollAnimationCounter = 0;
                                 this->timeIn = std::chrono::system_clock::now();
                             } else {
                                 // Calculate the increment based on the desired scroll rate
-                                // This formula depends on the rate you want (e.g., pixels per second)
-                                float scrollRate = 0.1; // Adjust this value for your desired rate
-                                auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(t-2000ms).count();
-                                float scrollIncrement = scrollRate * elapsedMilliseconds;
-                                this->m_scrollOffset = scrollIncrement;
+                                //this->m_scrollOffset = (1.0-0.9) * this->m_scrollOffset + 0.9 * (0.1 * std::chrono::duration_cast<std::chrono::milliseconds>(t - 2000ms).count());
+                                this->m_scrollOffset = (half(0.1) * std::chrono::duration_cast<std::chrono::milliseconds>(t - 2000ms).count());
+                                //this->m_scrollOffset = (customRound(0.10 * std::chrono::duration_cast<std::chrono::milliseconds>((t) - 2000ms).count() * 10000.0) / 10000.0);
                             }
                         } // CUSTOM MODIFICATION END
                     } else {
                         renderer->drawString(this->m_ellipsisText.c_str(), false, this->getX() + 20, this->getY() + 45, 23, a(defaultTextColor));
                     }
                 } else {
-                    renderer->drawString(this->m_text.c_str(), false, this->getX() + 20, this->getY() + 45, 23, a(defaultTextColor));
+                    if (this->m_focused)
+                        renderer->drawString(this->m_text.c_str(), false, this->getX() + 20, this->getY() + 45, 23, a(selectedTextColor));
+                    else
+                        renderer->drawString(this->m_text.c_str(), false, this->getX() + 20, this->getY() + 45, 23, a(defaultTextColor));
                 }
 
 
                 // CUSTOM SECTION START (modification for submenu footer color)
                 if (this->m_value == DROPDOWN_SYMBOL || this->m_value == OPTION_SYMBOL) {
-                    renderer->drawString(this->m_value.c_str(), false, this->getX() + this->m_maxWidth + 45, this->getY() + 45, 20, this->m_faint ? a(tsl::style::color::ColorDescription) : a(defaultTextColor));
+                    if (this->m_focused)
+                        renderer->drawString(this->m_value.c_str(), false, this->getX() + this->m_maxWidth + 45, this->getY() + 45, 20, this->m_faint ? a(tsl::style::color::ColorDescription) : a(selectedTextColor));
+                    else
+                        renderer->drawString(this->m_value.c_str(), false, this->getX() + this->m_maxWidth + 45, this->getY() + 45, 20, this->m_faint ? a(tsl::style::color::ColorDescription) : a(defaultTextColor));
                 } else if (this->m_value == CROSSMARK_SYMBOL) {
                     renderer->drawString(this->m_value.c_str(), false, this->getX() + this->m_maxWidth + 45, this->getY() + 45, 20, this->m_faint ? a(tsl::style::color::ColorDescription) : a(Color(0xF, 0x0, 0x0, 0xF)));
                 } else {
@@ -3526,7 +3601,6 @@ namespace tsl {
             virtual void setFocused(bool state) override {
                 this->m_scroll = false;
                 this->m_scrollOffset = 0;
-                this->m_scrollAnimationCounter = 0;
                 this->timeIn = std::chrono::system_clock::now(); // CUSTOM MODIFICATION
                 Element::setFocused(state);
             }
@@ -3590,10 +3664,9 @@ namespace tsl {
             bool m_touched = false;
 
             u16 m_maxScroll = 0;
-            float m_scrollOffset = 0;
+            half m_scrollOffset = half(0);
             u32 m_maxWidth = 0;
             u32 m_textWidth = 0;
-            u16 m_scrollAnimationCounter = 0;
         };
 
         /**
@@ -3610,7 +3683,7 @@ namespace tsl {
              * @param onValue Value drawn if the toggle is on
              * @param offValue Value drawn if the toggle is off
              */
-            ToggleListItem(const std::string& text, bool initialState, const std::string& onValue = "On", const std::string& offValue = "Off")
+            ToggleListItem(const std::string& text, bool initialState, const std::string& onValue = ON, const std::string& offValue = OFF)
                 : ListItem(text), m_state(initialState), m_onValue(onValue), m_offValue(offValue) {
 
                 this->setState(this->m_state);
@@ -3732,6 +3805,9 @@ namespace tsl {
             tsl::Color defaultTextColor = RGB888(defaultTextColorStr);
             std::string trackBarColorStr = parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "trackbar_color");
             Color trackBarColor = RGB888(trackBarColorStr, "#555555");
+            std::chrono::duration<long int, std::ratio<1, 1000000000>> t;
+            Color highlightColor = a({0xf,0xf,0xf,0xf});
+            half progress;
             
             /**
              * @brief Constructor
@@ -3806,7 +3882,7 @@ namespace tsl {
 
                 renderer->drawString(this->m_icon, false, this->getX() + 15, this->getY() + 50, 23, a(defaultTextColor));
 
-                u16 handlePos = (this->getWidth() - 95) * static_cast<float>(this->m_value) / 100;
+                u16 handlePos = (this->getWidth() - 95) * static_cast<half>(this->m_value) / 100;
                 renderer->drawCircle(this->getX() + 60, this->getY() + 42, 2, true, a(tsl::style::color::ColorHighlight));
                 renderer->drawCircle(this->getX() + 60 + this->getWidth() - 95, this->getY() + 42, 2, true, a(tsl::style::color::ColorFrame));
                 renderer->drawRect(this->getX() + 60 + handlePos, this->getY() + 40, this->getWidth() - 95 - handlePos, 5, a(tsl::style::color::ColorFrame));
@@ -3825,22 +3901,22 @@ namespace tsl {
             }
 
             virtual void drawHighlight(gfx::Renderer *renderer) override {
-                static float counter = 0;
-                const float progress = (std::sin(counter) + 1) / 2;
-                Color highlightColor = {   static_cast<u8>((0x2 - 0x8) * progress + 0x8),
-                                                static_cast<u8>((0x8 - 0xF) * progress + 0xF),
-                                                static_cast<u8>((0xC - 0xF) * progress + 0xF),
-                                                static_cast<u8>((0x6 - 0xD) * progress + 0xD) };
+                static half counter = half(0);
+                progress = half((std::sin(counter) + 1.0) / 2.0);
+                highlightColor = {   static_cast<u8>((0x2 - 0x8) * progress + 0x8),
+                                     static_cast<u8>((0x8 - 0xF) * progress + 0xF),
+                                     static_cast<u8>((0xC - 0xF) * progress + 0xF),
+                                     static_cast<u8>((0x6 - 0xD) * progress + 0xD) };
 
-                counter += 0.1F;
+                counter += half(0.1F);
 
-                u16 handlePos = (this->getWidth() - 95) * static_cast<float>(this->m_value) / 100;
+                u16 handlePos = (this->getWidth() - 95) * static_cast<half>(this->m_value) / 100;
 
                 s32 x = 0;
                 s32 y = 0;
 
                 if (Element::m_highlightShaking) {
-                    auto t = (std::chrono::system_clock::now() - Element::m_highlightShakingStartTime);
+                    t = (std::chrono::system_clock::now() - Element::m_highlightShakingStartTime);
                     if (t >= 100ms)
                         Element::m_highlightShaking = false;
                     else {
