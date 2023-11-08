@@ -55,7 +55,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 APP_TITLE	:= Ultra Paw
 APP_AUTHOR	:= b0rd2dEAth, redraz, pugemon
-APP_VERSION	:= 1.4.4
+APP_VERSION	:= 1.4.5
 TARGET	    := ovlmenu
 BUILD	    := build
 SOURCES	    := source common 
