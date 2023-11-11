@@ -1102,7 +1102,7 @@ namespace tsl {
         constexpr u8  ListItemHighlightLength       = 22;       ///< Maximum length of Listitem highlights
 
         namespace color {
-            constexpr Color ColorFrameBackground  = { 0x0, 0x0, 0x0, 0xA };   ///< Overlay frame background color
+            constexpr Color ColorFrameBackground  = { 0x0, 0x0, 0x0, 0xD };   ///< Overlay frame background color
             constexpr Color ColorTransparent      = { 0x0, 0x0, 0x0, 0x0 };   ///< Transparent color
             constexpr Color ColorHighlight        = { 0x0, 0xC, 0xF, 0xF };   ///< Greenish highlight color
             constexpr Color ColorFrame            = { 0x0, 0x0, 0x0, 0x0 };   ///< Outer boarder color // CUSTOM MODIFICATION
@@ -1317,6 +1317,7 @@ namespace tsl {
              * @brief Tesla config file
              */
             static const char* TESLA_CONFIG_FILE = "/config/tesla/config.ini"; // CUSTOM MODIFICATION
+            static const char* MONITOR_CONFIG_FILE = "/config/status-monitor/config.ini"; // CUSTOM MODIFICATION
             static const char* ULTRAHAND_CONFIG_FILE = "/config/ultrapaw/config.ini"; // CUSTOM MODIFICATION
 
             /**
@@ -4814,6 +4815,7 @@ namespace tsl {
 
     namespace impl {
         static const char* TESLA_CONFIG_FILE = "/config/tesla/config.ini"; // CUSTOM MODIFICATION
+        static const char* MONITOR_CONFIG_FILE = "/config/status-monitor/config.ini"; // CUSTOM MODIFICATION
         static const char* ULTRAHAND_CONFIG_FILE = "/config/ultrapaw/config.ini"; // CUSTOM MODIFICATION
         
         /**
@@ -4894,6 +4896,11 @@ namespace tsl {
                     { "key_combo", tsl::hlp::keysToComboString(keys) }
                 }}
             }, TESLA_CONFIG_FILE);
+            hlp::ini::updateOverlaySettings({
+                { "status-monitor", { // CUSTOM MODIFICATION
+                    { "key_combo", tsl::hlp::keysToComboString(keys) }
+                }}
+            }, MONITOR_CONFIG_FILE);
             hlp::ini::updateOverlaySettings({
                 { "ultrapaw", { // CUSTOM MODIFICATION
                     { "key_combo", tsl::hlp::keysToComboString(keys) }
@@ -5101,6 +5108,7 @@ namespace tsl {
         
         std::string settingsConfigPath = "sdmc:/config/ultrapaw/config.ini";
         std::string teslaSettingsConfigIniPath = "sdmc:/config/tesla/config.ini";
+        std::string monitorSettingsConfigIniPath = "sdmc:/config/status-monitor/config.ini";
         std::map<std::string, std::map<std::string, std::string>> settingsData = getParsedDataFromIniFile(settingsConfigPath);
         std::string inOverlayString;
         
@@ -5156,6 +5164,7 @@ namespace tsl {
                 if (updateMenuCombos) { // CUSTOM MODIFICATION
                     setIniFileValue(settingsConfigPath, "ultrapaw", "key_combo", "L+DDOWN+RS");
                     setIniFileValue(teslaSettingsConfigIniPath, "tesla", "key_combo", "L+DDOWN+RS");
+                    setIniFileValue(monitorSettingsConfigIniPath, "status-monitor", "key_combo", "L+DDOWN+RS");
                     updateMenuCombos = false;
                 }
             }
@@ -5195,7 +5204,7 @@ namespace tsl::cfg {
     u16 LayerPosY   = 0;
     u16 FramebufferWidth  = 0;
     u16 FramebufferHeight = 0;
-    u64 launchCombo = KEY_ZL | KEY_ZR | KEY_DDOWN;
+    u64 launchCombo = KEY_L | KEY_R | KEY_DUP;
     u64 launchCombo2 = KEY_L | KEY_DDOWN | KEY_RSTICK;
 }
 extern "C" void __libnx_init_time(void);

@@ -362,6 +362,7 @@ public:
                         if (combo != defaultCombo) {
                             setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", combo);
                             setIniFileValue(teslaSettingsConfigIniPath, "tesla", "key_combo", combo);
+                            setIniFileValue(monitorSettingsConfigIniPath, "status-monitor", "key_combo", combo);
                             reloadMenu = true;
                         }
                         
