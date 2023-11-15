@@ -90,12 +90,12 @@ void logMessage(const std::string& message) {
     }
     logEntry = "[" + logEntry + "] " + message + "\n";
 
-    FILE* file = fopen(logFilePath.c_str(), "a");
+    /**FILE* file = fopen(logFilePath.c_str(), "a");
     if (file != nullptr) {
         fputs(logEntry.c_str(), file);
-        trimLog(file);
+        //trimLog(file);
         fclose(file);
-    }
+    }*/
 }
 
 
