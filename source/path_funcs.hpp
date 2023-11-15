@@ -14,6 +14,8 @@
  *   of the project's documentation and must remain intact.
  * 
  *  Copyright (c) 2023 ppkantorski
+ *
+ *  Copyright (c) 2023 redraz
  *  All rights reserved.
  ********************************************************************************/
 

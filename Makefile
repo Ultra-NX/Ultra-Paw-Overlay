@@ -53,9 +53,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well. #lib/Atmosphere-libs/libexosphere/source/pmic
 #---------------------------------------------------------------------------------
-APP_TITLE	:= Ultra Paw
-APP_AUTHOR	:= b0rd2dEAth, redraz, pugemon
-APP_VERSION	:= 1.4.6
+APP_TITLE	:= Ultrahand
+APP_AUTHOR	:= b0rd2dEAth, redraz
+APP_VERSION	:= 1.4.7
 TARGET	    := ovlmenu
 BUILD	    := build
 SOURCES	    := source common 
