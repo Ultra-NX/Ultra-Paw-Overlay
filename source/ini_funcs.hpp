@@ -30,7 +30,7 @@
 #include <path_funcs.hpp>
 
 
-constexpr size_t BufferSize = 131072;
+constexpr size_t BufferSize = 4096;//131072;
 
 /**
  * @brief Represents a package header structure.
@@ -217,7 +217,7 @@ PackageHeader getPackageHeaderFromIni(const std::string& filePath) {
 static std::vector<std::string> split(const std::string& str, char delim = ' ') {
     std::vector<std::string> out;
     
-    std::size_t current, previous = 0;
+    size_t current, previous = 0;
     current = str.find(delim);
     while (current != std::string::npos) {
         out.push_back(str.substr(previous, current - previous));
@@ -480,7 +480,7 @@ void cleanIniFormatting(const std::string& filePath) {
     
     bool isNewSection = false;
     
-    char line[4096];
+    char line[BufferSize];
     
     std::string trimmedLine;
     while (fgets(line, sizeof(line), inputFile)) {

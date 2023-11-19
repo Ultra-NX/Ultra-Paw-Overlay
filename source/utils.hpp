@@ -70,7 +70,7 @@ static const std::string ultrahandRepo = "https://github.com/Ultra-NX/Ultra-Paw-
 static bool commandSuccess = false;
 static bool refreshGui = false;
 static bool usingErista = util::IsErista();
-static bool usingMariko = !(usingErista); // mariko is determined by it not being erista
+static bool usingMariko = !(util::IsErista()); // mariko is determined by it not being erista
 
 
 void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
@@ -767,16 +767,16 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
         commandName = cmd[0];
         
         if (commandName == "erista:" || commandName == "Erista:") {
-            inEristaSection = true && usingErista;
+            inEristaSection = true;
             inMarikoSection = false;
             continue;
         } else if (commandName == "mariko:" || commandName == "Mariko:") {
             inEristaSection = false;
-            inMarikoSection = true && usingMariko;
+            inMarikoSection = true;
             continue;
         }
         
-        if (inEristaSection || inMarikoSection || !(inEristaSection && inMarikoSection)) {
+        if ((inEristaSection && !inMarikoSection && usingErista) || (!inEristaSection && inMarikoSection && usingMariko) || (!inEristaSection && !inMarikoSection)) {
             
             if (cmd.size() > 1) {
                 if ((commandName == "list_source") && listString.empty())
@@ -913,16 +913,16 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                 logMessage("Try #"+std::to_string(tryCounter));
             continue;
         } else if (commandName == "erista:" || commandName == "Erista:") {
-            inEristaSection = true && usingErista;
+            inEristaSection = true;
             inMarikoSection = false;
             continue;
         } else if (commandName == "mariko:" || commandName == "Mariko:") {
             inEristaSection = false;
-            inMarikoSection = true && usingMariko;
+            inMarikoSection = true;
             continue;
         }
         
-        if (inEristaSection || inMarikoSection || !(inEristaSection && inMarikoSection)) {
+        if ((inEristaSection && !inMarikoSection && usingErista) || (!inEristaSection && inMarikoSection && usingMariko) || (!inEristaSection && !inMarikoSection)) {
             if (tryCounter == 0 || (commandSuccess && tryCounter != 0)) {
                 // Create a modified command vector to store changes
                 //std::vector<std::string> modifiedCmd = cmd;
