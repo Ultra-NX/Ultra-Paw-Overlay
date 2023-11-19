@@ -20,7 +20,7 @@
 #include <switch.h>
 
 // Specify the log file path
-const std::string logFilePath = "sdmc:/config/ultrahand/log.txt";
+const std::string logFilePath = "sdmc:/config/ultrapaw/log.txt";
 const int maxLines = 5000;
 
 
@@ -88,12 +88,12 @@ void logMessage(const std::string& message) {
     }
     logEntry = "[" + logEntry + "] " + message + "\n";
 
-    FILE* file = fopen(logFilePath.c_str(), "a");
+    /**FILE* file = fopen(logFilePath.c_str(), "a");
     if (file != nullptr) {
         fputs(logEntry.c_str(), file);
         //trimLog(file);
         fclose(file);
-    }
+    }*/
 }
 
 

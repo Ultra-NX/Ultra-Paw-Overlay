@@ -149,9 +149,9 @@ public:
             
             std::string fileContent = getFileContents(settingsConfigIniPath);
             
-            std::string defaultLang = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_lang");
-            std::string defaultMenu = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_menu");
-            std::string keyCombo = trim(parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "key_combo"));
+            std::string defaultLang = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_lang");
+            std::string defaultMenu = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_menu");
+            std::string keyCombo = trim(parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "key_combo"));
             
             
             if (defaultLang.empty())
@@ -209,7 +209,7 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(UI_SETTINGS));
             
-            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "current_theme");
+            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "current_theme");
             if (currentTheme.empty() || currentTheme == "default")
                 currentTheme = DEFAULT;
             listItem = new tsl::elm::ListItem(THEME);
@@ -254,7 +254,7 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader("Default Menu"));
             
-            std::string defaultMenu = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_menu");
+            std::string defaultMenu = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_menu");
             
             std::vector<std::string> defaultMenuModes = {"overlays", "packages"};
             
@@ -270,7 +270,7 @@ public:
                 
                 listItem->setClickListener([this, defaultMenuMode, listItem](uint64_t keys) { // Add 'this', 'i', and 'listItem' to the capture list
                     if (keys & KEY_A) {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "default_menu", defaultMenuMode);
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_menu", defaultMenuMode);
                         lastSelectedListItem->setValue("");
                         selectedListItem->setValue(defaultMenuMode);
                         listItem->setValue(CHECKMARK_SYMBOL);
@@ -287,7 +287,7 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(KEY_COMBO));
             
-            std::string defaultCombo = trim(parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "key_combo"));
+            std::string defaultCombo = trim(parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "key_combo"));
             
             tsl::elm::ListItem* listItem = nullptr;
             for (const auto& combo : defaultCombos) {
@@ -302,7 +302,9 @@ public:
                 listItem->setClickListener([this, combo, defaultCombo, listItem](uint64_t keys) { // Add 'this', 'i', and 'listItem' to the capture list
                     if (keys & KEY_A) {
                         if (combo != defaultCombo) {
-                            setIniFileValue(settingsConfigIniPath, "ultrahand", "key_combo", combo);
+                            setIniFileValue(settingsConfigIniPath, "ultrapaw", "key_combo", combo);
+                            setIniFileValue(teslaSettingsConfigIniPath, "tesla", "key_combo", combo);
+                            setIniFileValue(monitorSettingsConfigIniPath, "status-monitor", "key_combo", combo);
                             reloadMenu = true;
                         }
                         
@@ -323,14 +325,14 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(LANGUAGE));
             
-            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_lang");
+            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_lang");
             
             std::string langFile;
             bool skipLang;
             
             tsl::elm::ListItem* listItem = nullptr;
             for (const auto& defaultLangMode : defaultLanguages) {
-                langFile = "/config/ultrahand/lang/"+defaultLangMode+".json";
+                langFile = "/config/ultrapaw/lang/"+defaultLangMode+".json";
                 skipLang = (!isFileOrDirectory(langFile));
                 if (defaultLangMode != "en") {
                     if (skipLang)
@@ -347,7 +349,7 @@ public:
                 listItem->setClickListener([this, skipLang, defaultLangMode, defaulLang, langFile, listItem](uint64_t keys) { // Add 'this', 'i', and 'listItem' to the capture list
                     if (keys & KEY_A) {
                         //if (defaultLangMode != defaulLang) {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "default_lang", defaultLangMode);
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_lang", defaultLangMode);
                         reloadMenu = true;
                         reloadMenu2 = true;
                         
@@ -378,10 +380,10 @@ public:
             
             listItem->setClickListener([this, listItem](uint64_t keys) { // Add 'command' to the capture list
                 if (keys & KEY_A) {
-                    deleteFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl");
-                    isDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/ovlmenu.ovl", "/config/ultrahand/downloads/");
+                    deleteFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl");
+                    isDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/ovlmenu.ovl", "/config/ultrapaw/downloads/");
                     if (isDownloaded) {
-                        moveFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
+                        moveFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl", "/switch/.overlays/ovlmenu.ovl");
                         listItem->setValue(CHECKMARK_SYMBOL);
                         languagesVersion = "latest";
                     } else
@@ -399,17 +401,17 @@ public:
             
             listItem->setClickListener([this, listItem](uint64_t keys) { // Add 'command' to the capture list
                 if (keys & KEY_A) {
-                    deleteFileOrDirectory("/config/ultrahand/downloads/ovlmenu.ovl");
+                    deleteFileOrDirectory("/config/ultrapaw/downloads/ovlmenu.ovl");
                     bool languageDownloaded = false;
                     if (languagesVersion == "latest")
-                        languageDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/lang.zip", "/config/ultrahand/downloads/");
+                        languageDownloaded = downloadFile(ultrahandRepo+"releases/latest/download/lang.zip", "/config/ultrapaw/downloads/");
                     else
-                        languageDownloaded = downloadFile(ultrahandRepo+"releases/download/v"+languagesVersion+"/lang.zip", "/config/ultrahand/downloads/");
+                        languageDownloaded = downloadFile(ultrahandRepo+"releases/download/v"+languagesVersion+"/lang.zip", "/config/ultrapaw/downloads/");
                     if (languageDownloaded) {
-                        unzipFile("/config/ultrahand/downloads/lang.zip", "/config/ultrahand/downloads/lang/");
-                        deleteFileOrDirectory("/config/ultrahand/downloads/lang.zip");
-                        deleteFileOrDirectory("/config/ultrahand/lang/");
-                        moveFileOrDirectory("/config/ultrahand/downloads/lang/", "/config/ultrahand/lang/");
+                        unzipFile("/config/ultrapaw/downloads/lang.zip", "/config/ultrapaw/downloads/lang/");
+                        deleteFileOrDirectory("/config/ultrapaw/downloads/lang.zip");
+                        deleteFileOrDirectory("/config/ultrapaw/lang/");
+                        moveFileOrDirectory("/config/ultrapaw/downloads/lang/", "/config/ultrapaw/lang/");
                         listItem->setValue(CHECKMARK_SYMBOL);
                     } else
                         listItem->setValue(CROSSMARK_SYMBOL, false);
@@ -423,18 +425,18 @@ public:
             
             //list->addItem(new tsl::elm::CategoryHeader(OVERLAY_INFO));
             PackageHeader overlayHeader;
-            overlayHeader.title = "Ultrahand Overlay";
+            overlayHeader.title = "Ultra Paw Overlay";
             overlayHeader.version = std::string(APP_VERSION);
-            overlayHeader.creator = "b0rd2dEAth";
-            overlayHeader.about = "Ultrahand Overlay is a versatile tool that enables you to create and share custom command-based packages.";
-            overlayHeader.credits = "Special thanks to B3711, ComplexNarrative, Faker_dev, MasaGratoR, meha, WerWolv, HookedBehemoth and many others. <3";
+            overlayHeader.creator = "b0rd2dEAth, redraz";
+            overlayHeader.about = "Ultra Paw Overlay is a versatile tool that enables you to create and share custom command-based packages.";
+            overlayHeader.credits = "Special thanks to ppkantorski/b0rd2dEAth, «NSwitch 60 FPS Cheats & Mods» server in Discord, and «Ultra Group» in Telegram";
             addAppInfo(list, overlayHeader, "overlay");
             
         } else if (dropdownSelection == "themeMenu") {
             
             list->addItem(new tsl::elm::CategoryHeader(THEME));
             
-            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "current_theme");
+            std::string currentTheme = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "current_theme");
             
             if (currentTheme.empty())
                 currentTheme = "default";
@@ -454,7 +456,7 @@ public:
                 if (keys & KEY_A) {
                     
                     //if (defaultLangMode != defaultLang) {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "current_theme", "default");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "current_theme", "default");
                     deleteFileOrDirectory(themeConfigIniPath);
                     
                     if (isFileOrDirectory(defaultTheme))
@@ -495,9 +497,9 @@ public:
                 listItem->setClickListener([this, themeName, currentTheme, themeFile, listItem](uint64_t keys) { // Add 'this', 'i', and 'listItem' to the capture list
                     if (keys & KEY_A) {
                         //if (defaultLangMode != defaultLang) {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "current_theme", themeName);
-                        deleteFileOrDirectory("/config/ultrahand/theme.ini");
-                        copyFileOrDirectory(themeFile, "/config/ultrahand/theme.ini");
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "current_theme", themeName);
+                        deleteFileOrDirectory("/config/ultrapaw/theme.ini");
+                        copyFileOrDirectory(themeFile, "/config/ultrapaw/theme.ini");
                         
                         reloadMenu = true;
                         reloadMenu2 = true;
@@ -521,7 +523,7 @@ public:
             auto toggleListItem = new tsl::elm::ToggleListItem(CLOCK, false, ON, OFF);
             toggleListItem->setState((hideClock == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_clock", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_clock", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -531,7 +533,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(BATTERY, false, ON, OFF);
             toggleListItem->setState((hideBattery == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_battery", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_battery", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -540,7 +542,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(SOC_TEMPERATURE, false, ON, OFF);
             toggleListItem->setState((hideSOCTemp == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_soc_temp", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_soc_temp", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -549,7 +551,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(PCB_TEMPERATURE, false, ON, OFF);
             toggleListItem->setState((hidePCBTemp == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_pcb_temp", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_pcb_temp", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -557,12 +559,12 @@ public:
             
         } else if (dropdownSelection == "miscMenu") {
             list->addItem(new tsl::elm::CategoryHeader(MENU_ITEMS));
-            hideUserGuide = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "hide_user_guide");
+            hideUserGuide = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "hide_user_guide");
             
             auto toggleListItem = new tsl::elm::ToggleListItem(USER_GUIDE, false, ON, OFF);
             toggleListItem->setState((hideUserGuide == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_user_guide", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_user_guide", state ? "false" : "true");
                 if ((hideUserGuide == "false") != state)
                     reloadMenu = true;
             });
@@ -571,9 +573,9 @@ public:
             
             //list->addItem(new tsl::elm::CategoryHeader(VERSION_LABELS));
             
-            cleanVersionLabels = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "clean_version_labels");
-            hideOverlayVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "hide_overlay_versions");
-            hidePackageVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "hide_package_versions");
+            cleanVersionLabels = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "clean_version_labels");
+            hideOverlayVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "hide_overlay_versions");
+            hidePackageVersions = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "hide_package_versions");
             
             if (cleanVersionLabels.empty())
                 cleanVersionLabels = "false";
@@ -584,13 +586,13 @@ public:
             
             list->addItem(new tsl::elm::CategoryHeader(VERSION_LABELS));
             
-            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrahand", "default_lang");
+            std::string defaulLang = parseValueFromIniSection(settingsConfigIniPath, "ultrapaw", "default_lang");
             
             
             toggleListItem = new tsl::elm::ToggleListItem(CLEAN_LABELS, false, ON, OFF);
             toggleListItem->setState((cleanVersionLabels == "true"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "clean_version_labels", state ? "true" : "false");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "clean_version_labels", state ? "true" : "false");
                 if ((cleanVersionLabels == "true") != state) {
                     if (cleanVersionLabels == "false")
                         versionLabel = APP_VERSION+std::string("   (")+ extractTitle(loaderInfo)+" "+cleanVersionLabel(loaderInfo)+std::string(")");
@@ -608,7 +610,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(OVERLAY_LABELS, false, ON, OFF);
             toggleListItem->setState((hideOverlayVersions == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_overlay_versions", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_overlay_versions", state ? "false" : "true");
                 if ((hideOverlayVersions == "false") != state)
                     reloadMenu = true;
             });
@@ -617,7 +619,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(PACKAGE_LABELS, false, ON, OFF);
             toggleListItem->setState((hidePackageVersions == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_package_versions", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_package_versions", state ? "false" : "true");
                 if ((hidePackageVersions == "false") != state)
                     reloadMenu = true;
             });
@@ -627,7 +629,7 @@ public:
             list->addItem(new tsl::elm::ListItem(FAILED_TO_OPEN + ": " + settingsIniPath));
         
         
-        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultrahand", versionLabel);
+        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultra Paw", versionLabel);
         rootFrame->setContent(list);
         list = nullptr;
         return rootFrame;
@@ -861,7 +863,7 @@ public:
         } else
             list->addItem(new tsl::elm::ListItem(FAILED_TO_OPEN+": " + settingsIniPath));
         
-        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultrahand", versionLabel);
+        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultra Paw", versionLabel);
         //rootFrame = new tsl::elm::OverlayFrame(entryName, "Ultrahand Settings");
         rootFrame->setContent(list);
         list = nullptr;
@@ -1975,11 +1977,11 @@ public:
         tsl::elm::OverlayFrame *rootFrame = nullptr;
         if (usingPages) {
             if (currentPage == "left")
-                rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultrahand Package", "", packageHeader.color, "", pageRightName);
+                rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultra Paw Package", "", packageHeader.color, "", pageRightName);
             else if (currentPage == "right")
-                rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultrahand Package", "", packageHeader.color, pageLeftName, "");
+                rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultra Paw Package", "", packageHeader.color, pageLeftName, "");
         } else
-            rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultrahand Package", "", packageHeader.color);
+            rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(packagePath), "Ultra Paw Package", "", packageHeader.color);
         rootFrame->setContent(list);
         list = nullptr;
         return rootFrame;
@@ -2127,19 +2129,19 @@ public:
         bool settingsLoaded = false;
         if (isFileOrDirectory(settingsConfigIniPath)) {
             settingsData = getParsedDataFromIniFile(settingsConfigIniPath);
-            if (settingsData.count("ultrahand") > 0) {
-                auto& ultrahandSection = settingsData["ultrahand"];
+            if (settingsData.count("ultrapaw") > 0) {
+                auto& ultrahandSection = settingsData["ultrapaw"];
                 
                 if (ultrahandSection.count("hide_user_guide") > 0)
                     hideUserGuide = ultrahandSection["hide_user_guide"];
                 else {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_user_guide", "false");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_user_guide", "false");
                 }
                 
                 if (ultrahandSection.count("clean_version_labels") > 0)
                     cleanVersionLabels = ultrahandSection["clean_version_labels"];
                 else {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "clean_version_labels", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "clean_version_labels", "true");
                     cleanVersionLabels = "false";
                 }
                 
@@ -2147,13 +2149,13 @@ public:
                 if (ultrahandSection.count("hide_overlay_versions") > 0)
                     hideOverlayVersions = ultrahandSection["hide_overlay_versions"];
                 else {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_overlay_versions", "false");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_overlay_versions", "false");
                     hideOverlayVersions = "false";
                 }
                 if (ultrahandSection.count("hide_package_versions") > 0)
                     hidePackageVersions = ultrahandSection["hide_package_versions"];
                 else {
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_package_versions", "false");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_package_versions", "false");
                     hidePackageVersions = "false";
                 }
                 
@@ -2169,31 +2171,31 @@ public:
                 if (ultrahandSection.count("default_lang") > 0)
                     defaultLang = ultrahandSection["default_lang"];
                 else
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "default_lang", defaultLang);
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_lang", defaultLang);
                 
                 if (ultrahandSection.count("datetime_format") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "datetime_format", DEFAULT_DT_FORMAT);
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "datetime_format", DEFAULT_DT_FORMAT);
                 
                 if (ultrahandSection.count("hide_clock") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_clock", "false");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_clock", "false");
                 if (ultrahandSection.count("hide_battery") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_battery", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_battery", "true");
                 if (ultrahandSection.count("hide_pcb_temp") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_pcb_temp", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_pcb_temp", "true");
                 if (ultrahandSection.count("hide_soc_temp") == 0)
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_soc_temp", "true");
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_soc_temp", "true");
                 
             }
         }
         if (!settingsLoaded) { // write data if settings are not loaded
-            setIniFileValue(settingsConfigIniPath, "ultrahand", "default_lang", defaultLang);
-            setIniFileValue(settingsConfigIniPath, "ultrahand", "default_menu", defaultMenuMode);
-            setIniFileValue(settingsConfigIniPath, "ultrahand", "last_menu", menuMode);
-            setIniFileValue(settingsConfigIniPath, "ultrahand", "in_overlay", "false");
+            setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_lang", defaultLang);
+            setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_menu", defaultMenuMode);
+            setIniFileValue(settingsConfigIniPath, "ultrapaw", "last_menu", menuMode);
+            setIniFileValue(settingsConfigIniPath, "ultrapaw", "in_overlay", "false");
         }
         
         
-        std::string langFile = "/config/ultrahand/lang/"+defaultLang+".json";
+        std::string langFile = "/config/ultrapaw/lang/"+defaultLang+".json";
         if (isFileOrDirectory(langFile))
             parseLanguage(langFile);
         
@@ -2209,7 +2211,7 @@ public:
             }
         } else {
             defaultMenuMode = "last_menu";
-            setIniFileValue(settingsConfigIniPath, "ultrahand", "default_menu", defaultMenuMode);
+            setIniFileValue(settingsConfigIniPath, "ultrapaw", "default_menu", defaultMenuMode);
         }
         
         if (cleanVersionLabels == "true")
@@ -2405,7 +2407,7 @@ public:
                         listItem->setClickListener([this, overlayFile, newStarred, overlayFileName, overlayName](s64 key) {
                             if (key & KEY_A) {
                                 
-                                setIniFileValue(settingsConfigIniPath, "ultrahand", "in_overlay", "true"); // this is handled within tesla.hpp
+                                setIniFileValue(settingsConfigIniPath, "ultrapaw", "in_overlay", "true"); // this is handled within tesla.hpp
                                 std::string useOverlayLaunchArgs = parseValueFromIniSection(overlaysIniFilePath, overlayFileName, "use_launch_args");
                                 std::string overlayLaunchArgs = parseValueFromIniSection(overlaysIniFilePath, overlayFileName, "launch_args");
                                 
@@ -2990,7 +2992,7 @@ public:
         }
         
         
-        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultrahand", versionLabel, menuMode+hiddenMenuMode);
+        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame("Ultra Paw", versionLabel, menuMode+hiddenMenuMode);
         rootFrame->setContent(list);
         list = nullptr;
         
@@ -3023,14 +3025,14 @@ public:
             if (!freshSpawn && !returningToMain && !returningToHiddenMain) {
                 if ((keysHeld & KEY_DRIGHT) && !(keysHeld & (KEY_DLEFT | KEY_DUP | KEY_DDOWN | KEY_B | KEY_A | KEY_X | KEY_Y | KEY_L | KEY_R | KEY_ZL | KEY_ZR))) {
                     if (menuMode != "packages") {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "last_menu", "packages");
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "last_menu", "packages");
                         tsl::changeTo<MainMenu>();
                         return true;
                     }
                 }
                 if ((keysHeld & KEY_DLEFT) && !(keysHeld & (KEY_DRIGHT | KEY_DUP | KEY_DDOWN | KEY_B | KEY_A | KEY_X | KEY_Y | KEY_L | KEY_R | KEY_ZL | KEY_ZR))) {
                     if (menuMode != "overlays") {
-                        setIniFileValue(settingsConfigIniPath, "ultrahand", "last_menu", "overlays");
+                        setIniFileValue(settingsConfigIniPath, "ultrapaw", "last_menu", "overlays");
                         tsl::goBack();
                         tsl::changeTo<MainMenu>();
                         return true;
@@ -3038,7 +3040,7 @@ public:
                 }
                 if (keysHeld & KEY_B) {
                     //inMainMenu = false;
-                    setIniFileValue(settingsConfigIniPath, "ultrahand", "last_menu", defaultMenuMode);
+                    setIniFileValue(settingsConfigIniPath, "ultrapaw", "last_menu", defaultMenuMode);
                     tsl::Overlay::get()->close();
                     return true;
                 }
