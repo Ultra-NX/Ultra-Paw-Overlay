@@ -70,7 +70,7 @@ static const std::string ultrahandRepo = "https://github.com/Ultra-NX/Ultra-Paw-
 static bool commandSuccess = false;
 static bool refreshGui = false;
 static bool usingErista = util::IsErista();
-static bool usingMariko = !(util::IsErista()); // mariko is determined by it not being erista
+static bool usingMariko = util::IsMariko();
 
 
 void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
@@ -872,6 +872,8 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
     bool inEristaSection = false;
     bool inMarikoSection = false;
     
+    bool downloadSuccess;
+    
     std::string bootCommandName, sourcePath, destinationPath, \
         desiredSection, desiredNewSection, desiredKey, desiredNewKey, desiredValue, \
         offset, customPattern, hexDataToReplace, hexDataReplacement, fileUrl, clearOption;
@@ -1063,8 +1065,8 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             destinationPath = "sdmc:/";
                         }
                         
-                        std::string action = (commandName == "mirror_copy" || commandName == "mirror_cp") ? "copy" : "delete";
-                        mirrorFiles(sourcePath, destinationPath, action);
+                        //std::string action = (commandName == "mirror_copy" || commandName == "mirror_cp") ? "copy" : "delete";
+                        mirrorFiles(sourcePath, destinationPath, (commandName == "mirror_copy" || commandName == "mirror_cp") ? "copy" : "delete");
                     }
                 } else if (commandName == "rename" || commandName == "move" || commandName == "mv") { // Rename command
                     if (cmdSize >= 3) {
@@ -1200,7 +1202,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                     if (cmdSize >= 3) {
                         fileUrl = preprocessUrl(modifiedCmd[1]);
                         destinationPath = preprocessPath(modifiedCmd[2]);
-                        bool downloadSuccess = false;
+                        downloadSuccess = false;
                         
                         for (size_t i = 0; i < 3; ++i) { // Try 3 times.
                             downloadSuccess = downloadFile(fileUrl, destinationPath);
@@ -1220,11 +1222,14 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                         bootCommandName = removeQuotes(modifiedCmd[1]);
                         if (isFileOrDirectory(packagePath+bootPackageFileName)) {
                             auto bootOptions = loadOptionsFromIni(packagePath+bootPackageFileName, true);
+                            std::string bootOptionName;
+                            
+                            bool resetCommandSuccess;
                             for (const auto& bootOption:bootOptions) {
-                                std::string bootOptionName = bootOption.first;
-                                auto bootCommands = bootOption.second;
+                                bootOptionName = bootOption.first;
+                                auto& bootCommands = bootOption.second;
                                 if (bootOptionName == bootCommandName) {
-                                    bool resetCommandSuccess = false;
+                                    resetCommandSuccess = false;
                                     if (!commandSuccess)
                                         resetCommandSuccess = true;
                                     interpretAndExecuteCommand(bootCommands, packagePath+bootPackageFileName, bootOptionName); // Execute modified 
@@ -1232,13 +1237,13 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                                         commandSuccess = false;
                                         resetCommandSuccess = false;
                                     }
-                                    bootCommands.clear();
+                                    //bootCommands.clear();
                                     break;
                                 }
-                                bootCommands.clear();
+                                //bootCommands.clear();
                             }
-                            if (bootOptions.size() > 0)
-                                auto bootOption = bootOptions[0];
+                            //if (bootOptions.size() > 0)
+                            //    auto bootOption = bootOptions[0];
                             bootOptions.clear();
                         }
                     }
@@ -1251,9 +1256,9 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             rebootOption = removeQuotes(modifiedCmd[1]);
                             
                             if (cmdSize >= 3) {
-                                
+                                std::string option;
                                 if (rebootOption == "boot") {
-                                    std::string option = removeQuotes(modifiedCmd[2]);
+                                    option = removeQuotes(modifiedCmd[2]);
                                     Payload::HekateConfigList bootConfigList = Payload::LoadHekateConfigList();
                                     auto bootConfigIterator = bootConfigList.begin();  // Define the iterator here
                                     if (std::all_of(option.begin(), option.end(), ::isdigit)) {
@@ -1263,8 +1268,8 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                                         Payload::RebootToHekateConfig(*bootConfigIterator, false);
                                     
                                     } else { 
-                                        std::string entryName = option;
-                                        int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                                        std::string& entryName = option;
+                                        rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
                                         
                                         for (auto it = bootConfigList.begin(); it != bootConfigList.end(); ++it) {
                                             if (it->name == entryName) {
@@ -1278,7 +1283,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                                             Payload::RebootToHekateConfig(*bootConfigIterator, false);
                                     }
                                 } else if (rebootOption == "ini") {
-                                    std::string option = removeQuotes(modifiedCmd[2]);
+                                    option = removeQuotes(modifiedCmd[2]);
                                     Payload::HekateConfigList iniConfigList = Payload::LoadIniConfigList();
                                     auto iniConfigIterator = iniConfigList.begin();
                                     if (std::all_of(option.begin(), option.end(), ::isdigit)) {
@@ -1288,8 +1293,8 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                                         Payload::RebootToHekateConfig(*iniConfigIterator, true);
                                     
                                     } else { 
-                                        std::string entryName = option;
-                                        int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                                        std::string& entryName = option;
+                                        rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
                                         
                                         for (auto it = iniConfigList.begin(); it != iniConfigList.end(); ++it) {
                                             if (it->name == entryName) {
@@ -1318,7 +1323,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                                     setIniFileValue("/bootloader/ini/" + fileName + ".ini", fileName, "payload", rebootOption); // generate entry
                                     Payload::HekateConfigList iniConfigList = Payload::LoadIniConfigList();
                                     
-                                    int rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
+                                    rebootIndex = -1;  // Initialize rebootIndex to -1, indicating no match found
                                     auto iniConfigIterator = iniConfigList.begin();  // Define the iterator here
                                     
                                     for (auto it = iniConfigList.begin(); it != iniConfigList.end(); ++it) {
