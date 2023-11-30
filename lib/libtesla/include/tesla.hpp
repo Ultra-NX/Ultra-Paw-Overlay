@@ -2741,12 +2741,12 @@ namespace tsl {
             tsl::Color batteryColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "battery_color"));
             tsl::Color highlightColor = {0xF, 0xF, 0xF, 0xF};
             
-            tsl::Color versionTextColor = RGB888(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "version_text_color"), "#AAAAAA");
-            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "on_text_color"), "#00FFDD");
-            tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "off_text_color"), "#AAAAAA");
+            tsl::Color versionTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "version_text_color"), "#AAAAAA");
+            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00FFDD");
+            tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "off_text_color"), "#AAAAAA");
             
-            std::tuple<float,float,float> dynamicLogoRGB1 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "dynamic_logo_color_1"), "#00FF6F");
-            std::tuple<float,float,float> dynamicLogoRGB2 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "dynamic_logo_color_2"), "#8080EA");
+            std::tuple<float,float,float> dynamicLogoRGB1 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_1"), "#00FF6F");
+            std::tuple<float,float,float> dynamicLogoRGB2 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_2"), "#8080EA");
             
             std::string firstHalf, secondHalf;
             //tsl::Color handColor = RGB888("#F7253E");
@@ -2802,7 +2802,7 @@ namespace tsl {
                     countOffset = 0;
                                         
                     // Draw the second half of the string in red color
-                    renderer->drawString(firstHalf.c_str(), false, x, y+offset, fontSize, logoColor2);
+                    renderer->drawString(firstHalf.c_str(), false, x, y+offset, fontSize, logoColor1);
                     
                     if (!disableColorfulLogo) {
                         for (char letter : secondHalf) {
@@ -2865,7 +2865,7 @@ namespace tsl {
                         }
                     } else {
                         for (char letter : secondHalf) {
-                            renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, logoColor1);
+                            renderer->drawString(std::string(1, letter).c_str(), false, x + 105, y + offset, fontSize, logoColor2);
                             
                             // Manually calculate the width of the current letter
                             letterWidth = calculateStringWidth(std::string(1, letter), fontSize);
@@ -4256,7 +4256,7 @@ namespace tsl {
             u16 trackBarWidth, stepWidth, currentDescIndex;
             u32 descWidth, descHeight;
             
-            tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrahand/theme.ini", "theme", "off_text_color"), "#AAAAAA");
+            tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "off_text_color"), "#AAAAAA");
             
             /**
              * @brief Constructor

@@ -556,7 +556,7 @@ public:
             toggleListItem = new tsl::elm::ToggleListItem(BATTERY, false, ON, OFF);
             toggleListItem->setState((hideBattery == "false"));
             toggleListItem->setStateChangedListener([this, toggleListItem](bool state) {
-                setIniFileValue(settingsConfigIniPath, "ultrahand", "hide_battery", state ? "false" : "true");
+                setIniFileValue(settingsConfigIniPath, "ultrapaw", "hide_battery", state ? "false" : "true");
                 reinitializeWidgetVars();
                 redrawWidget = true;
             });
@@ -1055,7 +1055,7 @@ public:
         } else
             list->addItem(new tsl::elm::ListItem(FAILED_TO_OPEN+": " + packageFile));
         
-        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame(packageName, "Ultrahand Script");
+        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame(packageName, "Ultra Paw Script");
         rootFrame->setContent(list);
         list = nullptr;
         return rootFrame;
@@ -1495,7 +1495,7 @@ public:
         selectedItemsListOn.clear();
         selectedItemsListOff.clear();
         
-        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(filePath), "Ultrahand Package", "", packageHeader.color);
+        tsl::elm::OverlayFrame *rootFrame = new tsl::elm::OverlayFrame(getNameFromPath(filePath), "Ultra Paw Package", "", packageHeader.color);
         rootFrame->setContent(list);
         list = nullptr;
         return rootFrame;
