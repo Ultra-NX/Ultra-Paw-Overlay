@@ -2742,7 +2742,7 @@ namespace tsl {
             tsl::Color highlightColor = {0xF, 0xF, 0xF, 0xF};
             
             tsl::Color versionTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "version_text_color"), "#AAAAAA");
-            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00FFDD");
+            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00CCFF");
             tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "off_text_color"), "#AAAAAA");
             
             std::tuple<float,float,float> dynamicLogoRGB1 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_1"), "#00FF6F");
@@ -3626,7 +3626,7 @@ namespace tsl {
             tsl::Color selectedTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "selection_text_color"));
             
             tsl::Color invalidTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "invalid_text_color"), "#FF0000");
-            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00FFDD");
+            tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00CCFF");
             tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "off_text_color"), "#AAAAAA");
             
             std::chrono::system_clock::time_point timeIn;// = std::chrono::system_clock::now();

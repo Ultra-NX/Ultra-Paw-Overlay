@@ -111,7 +111,7 @@ void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
                 setIniFileValue(themeIniPath, "theme", "version_text_color", "#AAAAAA");
             
             if (themedSection.count("on_text_color") == 0)
-                setIniFileValue(themeIniPath, "theme", "on_text_color", "#00FFDD");
+                setIniFileValue(themeIniPath, "theme", "on_text_color", "#00CCFF");
             
             if (themedSection.count("off_text_color") == 0)
                 setIniFileValue(themeIniPath, "theme", "off_text_color", "#AAAAAA");
@@ -174,7 +174,7 @@ void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
         setIniFileValue(themeIniPath, "theme", "text_color", "#FFFFFF");
         setIniFileValue(themeIniPath, "theme", "info_text_color", "#FFFFFF");
         setIniFileValue(themeIniPath, "theme", "version_text_color", "#AAAAAA");
-        setIniFileValue(themeIniPath, "theme", "on_text_color", "#00FFDD");
+        setIniFileValue(themeIniPath, "theme", "on_text_color", "#00CCFF");
         setIniFileValue(themeIniPath, "theme", "off_text_color", "#AAAAAA");
         setIniFileValue(themeIniPath, "theme", "invalid_text_color", "#FF0000");
         setIniFileValue(themeIniPath, "theme", "selection_text_color", "#FFFFFF");
@@ -245,7 +245,7 @@ void copyTeslaKeyComboToUltrahand() {
 
 void addHelpInfo(auto& list) {
     tsl::Color infoTextColor = tsl::RGB888(parseValueFromIniSection(themeConfigIniPath, "theme", "info_text_color"), "#FFFFFF");
-    tsl::Color onTextColor = tsl::RGB888(parseValueFromIniSection(themeConfigIniPath, "theme", "on_text_color"), "#00FFDD");
+    tsl::Color onTextColor = tsl::RGB888(parseValueFromIniSection(themeConfigIniPath, "theme", "on_text_color"), "#00CCFF");
     
     // Add a section break with small text to indicate the "Commands" section
     list->addItem(new tsl::elm::CategoryHeader(USER_GUIDE));
