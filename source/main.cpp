@@ -1188,6 +1188,10 @@ public:
                 inEristaSection = false;
                 inMarikoSection = true;
                 continue;
+            } else if (commandName == "all:" || commandName == "All:") {
+                inEristaSection = false;
+                inMarikoSection = false;
+                continue;
             }
             
             if ((inEristaSection && !inMarikoSection && usingErista) || (!inEristaSection && inMarikoSection && usingMariko) || (!inEristaSection && !inMarikoSection)) {
@@ -1777,6 +1781,10 @@ public:
                     } else if (commandName == "mariko:" || commandName == "Mariko:") {
                         inEristaSection = false;
                         inMarikoSection = true;
+                        continue;
+                    } else if (commandName == "all:" || commandName == "All:") {
+                        inEristaSection = false;
+                        inMarikoSection = false;
                         continue;
                     }
                     
@@ -2807,6 +2815,10 @@ public:
                         } else if (commandName == "mariko:" || commandName == "Mariko:") {
                             inEristaSection = false;
                             inMarikoSection = true;
+                            continue;
+                        } else if (commandName == "all:" || commandName == "All:") {
+                            inEristaSection = false;
+                            inMarikoSection = false;
                             continue;
                         }
                         

@@ -563,7 +563,32 @@ bool isDangerousCombination(const std::string& patternPath) {
     return false; // Pattern path is not a protected folder, a dangerous pattern, or includes a wildcard at the root level
 }
 
+bool isMarikoHWType()
+{
+    u64 hardware_type = -1;
+    auto rc = splGetConfig(SplConfigItem_HardwareType, &hardware_type);
+    if (R_FAILED(rc)) {
+        logMessage("ERROR: splGetConfig failed to fetch HardwareType");
+        return false;
+    }
 
+    logMessage("INFO: HardwareType: " + std::to_string(hardware_type));
+
+    switch (hardware_type) {
+    case 0: // Icosa
+    case 1: // Copper
+        return false; // Erista
+    case 2: // Hoag
+    case 3: // Iowa
+    case 4: // Calcio
+    case 5: // Aula
+        return true; // Mariko
+    default:
+        logMessage("ERROR: unknown HardwareType: " + std::to_string(hardware_type));
+        throw std::runtime_error("ERROR: unknown HardwareType: " + std::to_string(hardware_type));
+        return false;
+    }
+}
 
 /**
  * @brief Loads and parses options from an INI file.
@@ -600,6 +625,8 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
     char line[BufferSize];
     std::string currentOption;
     std::vector<std::vector<std::string>> commands;
+    static bool isMariko = isMarikoHWType();
+    bool skipCommand = false;
     
     bool isFirstEntry = true;
     std::string trimmedLine;
@@ -613,9 +640,15 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
         trimmedLine = line;
         trimmedLine.erase(trimmedLine.find_last_not_of("\r\n") + 1);  // Remove trailing newline character
         
-        if (trimmedLine.empty() || trimmedLine[0] == '#')
-            continue;// Skip empty lines and comment lines
-        else if (trimmedLine[0] == '[' && trimmedLine.back() == ']') {
+        if (trimmedLine.empty() || trimmedLine[0] == '#') {
+            continue; // Skip empty lines and comment lines
+        } else if (trimmedLine == ";mariko") {
+            skipCommand = (!isMariko);
+            continue;
+        } else if (trimmedLine == ";erista") {
+            skipCommand = (isMariko);
+            continue;
+        } else if (trimmedLine[0] == '[' && trimmedLine.back() == ']') {
             if (isFirstEntry) { // for preventing header comments from being loaded within the first command section
                 commands.clear();
                 isFirstEntry = false;
@@ -623,12 +656,15 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
             
             // New option section
             if (!currentOption.empty()) {
+                if(!skipCommand){
                 // Store previous option and its commands
                 options.emplace_back(std::move(currentOption), std::move(commands));
+                }
                 commands.clear();
+                skipCommand = false;
             }
             currentOption = trimmedLine.substr(1, trimmedLine.size() - 2);  // Extract option name
-        } else {
+        } else if (!currentOption.empty()) {
             // Command line
             //std::istringstream iss(trimmedLine);
             iss.clear(); // Reset stream state
@@ -658,8 +694,11 @@ std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>> loadO
     }
     
     // Store the last option and its commands
-    if (!currentOption.empty())
-        options.emplace_back(std::move(currentOption), std::move(commands));
+    if (!currentOption.empty()) {
+            if(!skipCommand){
+                options.emplace_back(std::move(currentOption), std::move(commands));
+        }
+    }
     
     fclose(configFile);
     return options;
@@ -794,6 +833,10 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
         } else if (commandName == "mariko:" || commandName == "Mariko:") {
             inEristaSection = false;
             inMarikoSection = true;
+            continue;
+        } else if (commandName == "all:" || commandName == "All:") {
+            inEristaSection = false;
+            inMarikoSection = false;
             continue;
         }
         
@@ -942,6 +985,10 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
         } else if (commandName == "mariko:" || commandName == "Mariko:") {
             inEristaSection = false;
             inMarikoSection = true;
+            continue;
+        } else if (commandName == "all:" || commandName == "All:") {
+            inEristaSection = false;
+            inMarikoSection = false;
             continue;
         }
         
