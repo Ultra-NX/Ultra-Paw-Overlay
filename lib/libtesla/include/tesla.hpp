@@ -141,6 +141,7 @@ static const std::string OPTION_SYMBOL = "\u22EF";
 static const std::string DROPDOWN_SYMBOL = "\u25B6";
 static const std::string CHECKMARK_SYMBOL = "\uE14B";
 static const std::string CROSSMARK_SYMBOL = "\uE14C";
+static const std::string DOWNLOAD_SYMBOL = "\u2193";
 static const std::string STAR_SYMBOL = "\u2605";
 
 
@@ -2745,7 +2746,7 @@ namespace tsl {
             tsl::Color onTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "on_text_color"), "#00CCFF");
             tsl::Color offTextColor = RGB888(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "off_text_color"), "#AAAAAA");
             
-            std::tuple<float,float,float> dynamicLogoRGB1 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_1"), "#00FF6F");
+            std::tuple<float,float,float> dynamicLogoRGB1 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_1"), "#00E669");
             std::tuple<float,float,float> dynamicLogoRGB2 = hexToRGB444Floats(parseValueFromIniSection("/config/ultrapaw/theme.ini", "theme", "dynamic_logo_color_2"), "#8080EA");
             
             std::string firstHalf, secondHalf;

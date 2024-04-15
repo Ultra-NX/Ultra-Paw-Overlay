@@ -16,6 +16,6 @@ Please note that running homebrew software on your Nintendo Switch may void your
 
 ## License
 
-This project is licensed under the [CC-BY-NC-SA 4.0 License](LICENSE).
+This project is licensed and distributed under [GPLv2](LICENSE) with custom code utilizing [CC-BY-4.0](SUB_LICENSE).
 
-Copyright (c) 2023 ppkantorski, redraz
+Copyright (c) 2024 ppkantorski, redraz

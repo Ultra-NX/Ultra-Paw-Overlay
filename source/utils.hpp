@@ -12,7 +12,7 @@
  *   Note: Please be aware that this notice cannot be altered or removed. It is a part
  *   of the project's documentation and must remain intact.
  *
- *  Licensed under CC BY-NC-SA 4.0
+ *  Licensed under GPLv2
  *  Copyright (c) 2023 ppkantorski
  ********************************************************************************/
 
@@ -25,6 +25,7 @@
 #include <hex_funcs.hpp>
 #include <download_funcs.hpp>
 #include <list_funcs.hpp>
+#include <mod_funcs.hpp>
 
 #include <payload.hpp> // Studious Pancake
 #include <util.hpp> // Studious Pancake
@@ -66,7 +67,7 @@ static const std::string overlaysIniFilePath = settingsPath + "overlays.ini";
 static const std::string packagesIniFilePath = settingsPath + "packages.ini";
 static const std::string ultrahandRepo = "https://github.com/Ultra-NX/Ultra-Paw-Overlay/";
 
-
+static bool isDownloadCommand = false;
 static bool commandSuccess = false;
 static bool refreshGui = false;
 static bool usingErista = util::IsErista();
@@ -154,7 +155,7 @@ void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
                 setIniFileValue(themeIniPath, "theme", "logo_color_2", "#FF0000");
             
             if (themedSection.count("dynamic_logo_color_1") == 0)
-                setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_1", "#00FF6F");
+                setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_1", "#00E669");
             
             if (themedSection.count("dynamic_logo_color_2") == 0)
                 setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_2", "#8080EA");
@@ -188,7 +189,7 @@ void initializeTheme(std::string themeIniPath = themeConfigIniPath) {
         setIniFileValue(themeIniPath, "theme", "disable_colorful_logo", "false");
         setIniFileValue(themeIniPath, "theme", "logo_color_1", "#FFFFFF");
         setIniFileValue(themeIniPath, "theme", "logo_color_2", "#F7253E");
-        setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_1", "#00FF6F");
+        setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_1", "#00E669");
         setIniFileValue(themeIniPath, "theme", "dynamic_logo_color_2", "#8080EA");
     }
 }
@@ -825,7 +826,10 @@ std::vector<std::vector<std::string>> getSourceReplacement(const std::vector<std
         
         //modifiedCmd.reserve(cmd.size()); // Reserve memory for efficiency
         commandName = cmd[0];
-        
+
+        if (commandName == "download")
+            isDownloadCommand = true;
+
         if (commandName == "erista:" || commandName == "Erista:") {
             inEristaSection = true;
             inMarikoSection = false;
@@ -1007,7 +1011,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             replacement = replaceHexPlaceholder(arg.substr(startPos, endPos - startPos + 2), hexPath);
                             arg.replace(startPos, endPos - startPos + 2, replacement);
                             if (arg == lastArg) {
-                                arg.replace(startPos, endPos - startPos + 2, "-1"); // fall back replacement value of -1
+                                arg.replace(startPos, endPos - startPos + 2, "null"); // fall back replacement value of null
                                 commandSuccess = false;
                                 break;
                             }
@@ -1022,7 +1026,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             replacement = replaceIniPlaceholder(arg.substr(startPos, endPos - startPos + 2), iniPath);
                             arg.replace(startPos, endPos - startPos + 2, replacement);
                             if (arg == lastArg) {
-                                arg.replace(startPos, endPos - startPos + 2, "-1"); // fall back replacement value of -1
+                                arg.replace(startPos, endPos - startPos + 2, "null"); // fall back replacement value of null
                                 commandSuccess = false;
                                 break;
                             }
@@ -1038,7 +1042,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             replacement = stringToList(listString)[listIndex];
                             arg.replace(startPos, endPos - startPos + 2, replacement);
                             if (arg == lastArg) {
-                                arg.replace(startPos, endPos - startPos + 2, "-1"); // fall back replacement value of -1
+                                arg.replace(startPos, endPos - startPos + 2, "null"); // fall back replacement value of null
                                 commandSuccess = false;
                                 break;
                             }
@@ -1053,7 +1057,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json", jsonString);
                             arg.replace(startPos, endPos - startPos + 2, replacement);
                             if (arg == lastArg) {
-                                arg.replace(startPos, endPos - startPos + 2, "-1"); // fall back replacement value of -1
+                                arg.replace(startPos, endPos - startPos + 2, UNAVAILABLE_SELECTION); // fall back replacement value of `UNAVAILABLE_SELECTION`
                                 commandSuccess = false;
                                 break;
                             }
@@ -1068,7 +1072,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                             replacement = replaceJsonPlaceholder(arg.substr(startPos, endPos - startPos + 2), "json_file", jsonPath);
                             arg.replace(startPos, endPos - startPos + 2, replacement);
                             if (arg == lastArg) {
-                                arg.replace(startPos, endPos - startPos + 2, "-1"); // fall back replacement value of -1
+                                arg.replace(startPos, endPos - startPos + 2, UNAVAILABLE_SELECTION); // fall back replacement value of `UNAVAILABLE_SELECTION`
                                 commandSuccess = false;
                                 break;
                             }
@@ -1277,6 +1281,7 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                         destinationPath = preprocessPath(modifiedCmd[2]);
                         downloadSuccess = false;
                         
+                        //setIniFileValue((packagePath+configFileName).c_str(), selectedCommand.c_str(), "footer", "downloading");
                         for (size_t i = 0; i < 3; ++i) { // Try 3 times.
                             downloadSuccess = downloadFile(fileUrl, destinationPath);
                             if (downloadSuccess)
@@ -1289,6 +1294,12 @@ void interpretAndExecuteCommand(const std::vector<std::vector<std::string>>& com
                         sourcePath = preprocessPath(modifiedCmd[1]);
                         destinationPath = preprocessPath(modifiedCmd[2]);
                         commandSuccess = unzipFile(sourcePath, destinationPath) && commandSuccess;
+                    }
+                } else if (commandName == "pchtxt2ips") {
+                    if (cmdSize >= 3) {
+                        sourcePath = preprocessPath(modifiedCmd[1]);
+                        destinationPath = preprocessPath(modifiedCmd[2]);
+                        commandSuccess = pchtxt2ips(sourcePath, destinationPath) && commandSuccess;
                     }
                 } else if (commandName == "exec") {
                     if (cmdSize >= 2) {
